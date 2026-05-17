@@ -4,12 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <title>Betting Tracker</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{
   --bg:#ffffff;--bg2:#f5f5f5;--bg3:#ebebeb;--text:#1a1a1a;--text2:#666;--text3:#999;
-  --border:rgba(0,0,0,0.12);--border2:rgba(0,0,0,0.2);
+  --border:rgba(0,0,0,0.12);--border2:rgba(0,0,0,0.22);
   --green:#1D9E75;--red:#E24B4A;--blue:#378ADD;
   --radius:8px;--radius-lg:12px;
 }
@@ -18,75 +17,134 @@
   --border:rgba(255,255,255,0.1);--border2:rgba(255,255,255,0.2);
 }}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;color:var(--text);background:var(--bg);min-height:100vh;}
+
+/* API KEY SETUP SCREEN */
+#setup-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999;padding:20px;}
+.setup-card{background:var(--bg);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:32px;max-width:480px;width:100%;}
+.setup-title{font-size:20px;font-weight:600;margin-bottom:8px;}
+.setup-sub{font-size:13px;color:var(--text2);margin-bottom:24px;line-height:1.6;}
+.setup-input{width:100%;padding:10px 12px;border:1px solid var(--border2);border-radius:var(--radius);background:var(--bg);color:var(--text);font-size:13px;font-family:monospace;margin-bottom:12px;}
+.setup-btn{width:100%;padding:12px;border:none;border-radius:var(--radius);background:var(--text);color:var(--bg);font-size:14px;font-weight:600;cursor:pointer;}
+.setup-note{font-size:11px;color:var(--text3);margin-top:12px;line-height:1.6;}
+
+/* TABS */
 .tabs{display:flex;overflow-x:auto;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:0;z-index:20;padding:0 8px;scrollbar-width:none;}
 .tabs::-webkit-scrollbar{display:none;}
-.tab{flex-shrink:0;padding:12px 14px;cursor:pointer;font-size:12px;font-weight:500;color:var(--text2);border-bottom:2px solid transparent;white-space:nowrap;background:transparent;border-top:none;border-left:none;border-right:none;transition:color .2s;}
+.tab{flex-shrink:0;padding:12px 14px;cursor:pointer;font-size:12px;font-weight:500;color:var(--text2);border-bottom:2px solid transparent;white-space:nowrap;background:transparent;border-top:none;border-left:none;border-right:none;}
 .tab.active{color:var(--text);border-bottom-color:var(--text);}
-.page{display:none;padding:14px;max-width:900px;margin:0 auto;}.page.active{display:block;}
+.page{display:none;padding:14px;max-width:960px;margin:0 auto;}.page.active{display:block;}
+
+/* METRICS */
 .metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-bottom:16px;}
 .metric{background:var(--bg2);border-radius:var(--radius);padding:12px 14px;}
 .metric-label{font-size:11px;color:var(--text2);margin-bottom:4px;}
-.metric-val{font-size:22px;font-weight:600;}
+.metric-val{font-size:21px;font-weight:600;}
+
+/* CARDS */
 .card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 16px;margin-bottom:14px;}
 .card-title{font-size:11px;font-weight:600;color:var(--text2);margin-bottom:12px;text-transform:uppercase;letter-spacing:.06em;}
 .green{color:var(--green);}.red{color:var(--red);}
+
+/* FORMS */
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
-.form-row.one{grid-template-columns:1fr;}.form-row.three{grid-template-columns:1fr 1fr 1fr;}
+.form-row.one{grid-template-columns:1fr;}
 label{font-size:11px;color:var(--text2);display:block;margin-bottom:3px;}
 input,select,textarea{width:100%;padding:8px 10px;border:1px solid var(--border2);border-radius:var(--radius);background:var(--bg);color:var(--text);font-size:13px;font-family:inherit;outline:none;}
 input:focus,select:focus,textarea:focus{border-color:var(--blue);}
-textarea{resize:vertical;min-height:60px;}
-.btn{padding:8px 16px;border:1px solid var(--border2);border-radius:var(--radius);background:transparent;color:var(--text);cursor:pointer;font-size:13px;font-family:inherit;transition:background .15s;}
+textarea{resize:vertical;min-height:80px;line-height:1.5;}
+
+/* BUTTONS */
+.btn{padding:8px 16px;border:1px solid var(--border2);border-radius:var(--radius);background:transparent;color:var(--text);cursor:pointer;font-size:13px;font-family:inherit;}
 .btn:hover{background:var(--bg2);}
 .btn.primary{background:var(--text);color:var(--bg);border-color:var(--text);font-weight:500;}
 .btn.primary:hover{opacity:.9;}
-.btn-row{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
+.btn.success{background:var(--green);color:#fff;border-color:var(--green);font-weight:500;}
+.btn-row{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;align-items:center;}
+
+/* TABLES */
 .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
-table{width:100%;border-collapse:collapse;font-size:12px;min-width:500px;}
+table{width:100%;border-collapse:collapse;font-size:12px;min-width:480px;}
 th{text-align:left;padding:8px 10px;font-size:10px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border);white-space:nowrap;}
 td{padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:middle;}
 tr:last-child td{border-bottom:none;}
 tr:hover td{background:var(--bg2);}
+
+/* BADGES & DOTS */
 .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;flex-shrink:0;vertical-align:middle;}
 .badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;white-space:nowrap;}
-.badge-w{background:#EAF3DE;color:#3B6D11;}.badge-l{background:#FCEBEB;color:#A32D2D;}
-.badge-p{background:#FAEEDA;color:#854F0B;}.badge-pend{background:var(--bg2);color:var(--text2);}
+.badge-w{background:#EAF3DE;color:#3B6D11;}
+.badge-l{background:#FCEBEB;color:#A32D2D;}
+.badge-p{background:#FAEEDA;color:#854F0B;}
+.badge-pend{background:var(--bg2);color:var(--text2);}
+
+/* ACCOUNT ROWS */
 .acct-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);}
 .acct-row:last-child{border-bottom:none;}
 .acct-left{display:flex;align-items:center;gap:10px;}
 .acct-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0;}
-.acct-name{font-weight:600;font-size:14px;}.acct-sub{font-size:11px;color:var(--text2);margin-top:2px;}
+.acct-name{font-weight:600;font-size:14px;}
+.acct-sub{font-size:11px;color:var(--text2);margin-top:2px;}
+
+/* BAR CHARTS */
 .bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
-.bar-label{font-size:12px;color:var(--text2);width:110px;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-shrink:0;}
+.bar-label{font-size:12px;color:var(--text2);width:120px;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-shrink:0;}
 .bar-wrap{flex:1;background:var(--bg3);border-radius:4px;height:8px;overflow:hidden;}
 .bar-fill{height:8px;border-radius:4px;transition:width .4s ease;}
-.bar-num{font-size:12px;font-weight:600;width:75px;text-align:right;flex-shrink:0;}
-.player-card{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);}
-.player-card:last-child{border-bottom:none;}
+.bar-num{font-size:12px;font-weight:600;width:80px;text-align:right;flex-shrink:0;}
+
+/* CHIPS */
 .chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;scrollbar-width:none;margin-bottom:12px;}
 .chips::-webkit-scrollbar{display:none;}
-.chip{flex-shrink:0;padding:6px 12px;border:1px solid var(--border2);border-radius:20px;cursor:pointer;font-size:12px;color:var(--text2);background:transparent;white-space:nowrap;transition:all .15s;}
+.chip{flex-shrink:0;padding:5px 12px;border:1px solid var(--border2);border-radius:20px;cursor:pointer;font-size:12px;color:var(--text2);background:transparent;white-space:nowrap;}
 .chip.active{background:var(--text);color:var(--bg);border-color:var(--text);font-weight:500;}
+
 .empty{text-align:center;padding:32px;color:var(--text2);font-size:13px;}
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 20px;border-radius:var(--radius);font-size:13px;font-weight:500;z-index:100;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;}
-.toast.show{opacity:1;}
-.spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--border2);border-top-color:var(--text);border-radius:50%;animation:spin .6s linear infinite;margin-right:6px;vertical-align:middle;}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--border2);border-top-color:var(--text);border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:6px;}
 @keyframes spin{to{transform:rotate(360deg);}}
-.saving-row{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);font-size:13px;}
-.saving-row .label{font-weight:500;}
-.saving-row .sub{font-size:11px;color:var(--text2);margin-top:2px;}
+
+/* PARSE RESULT */
+.parse-result{background:var(--bg2);border-radius:var(--radius-lg);padding:14px 16px;margin-top:12px;display:none;}
+.parse-result.show{display:block;}
+.parse-field{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:13px;}
+.parse-field:last-child{border-bottom:none;}
+.parse-key{color:var(--text2);font-size:12px;}
+.parse-val{font-weight:500;text-align:right;max-width:60%;word-break:break-word;}
+
+/* SETTINGS ROW */
+.settings-row{display:flex;justify-content:flex-end;padding:8px 14px;border-bottom:1px solid var(--border);background:var(--bg);}
+.settings-link{font-size:11px;color:var(--text2);cursor:pointer;text-decoration:underline;}
+
 @media(max-width:500px){
-  .form-row.three{grid-template-columns:1fr 1fr;}
   .metric-val{font-size:18px;}
   .page{padding:10px;}
-  .bar-label{width:80px;}
+  .bar-label{width:85px;}
+  .form-row{grid-template-columns:1fr;}
 }
 </style>
 </head>
 <body>
- 
-<div id="toast" class="toast"></div>
- 
+
+<!-- API KEY SETUP SCREEN -->
+<div id="setup-screen" style="display:none;">
+  <div class="setup-card">
+    <div class="setup-title">Welcome to Betting Tracker</div>
+    <div class="setup-sub">To enable natural language bet parsing, enter your Anthropic API key below. It's stored only in your browser — never uploaded anywhere.</div>
+    <input type="password" class="setup-input" id="setup-key" placeholder="sk-ant-api03-...">
+    <button class="setup-btn" onclick="saveApiKey()">Save & open tracker</button>
+    <div class="setup-note">
+      Get your key at console.anthropic.com → API Keys.<br>
+      Your key stays in your browser's local storage on this device only.<br>
+      <span style="cursor:pointer;text-decoration:underline;" onclick="skipSetup()">Skip for now (natural language parsing will be disabled)</span>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS ICON -->
+<div class="settings-row" id="main-ui" style="display:none;">
+  <span class="settings-link" onclick="showSetup()">⚙ API key settings</span>
+</div>
+
+<div id="app" style="display:none;">
 <div class="tabs">
   <button class="tab active" onclick="switchTab('dashboard',this)">Dashboard</button>
   <button class="tab" onclick="switchTab('log',this)">Bets</button>
@@ -95,7 +153,7 @@ tr:hover td{background:var(--bg2);}
   <button class="tab" onclick="switchTab('accounts',this)">Accounts</button>
   <button class="tab" onclick="switchTab('misc',this)">Misc</button>
 </div>
- 
+
 <!-- DASHBOARD -->
 <div id="dashboard" class="page active">
   <div class="chips" id="dash-chips">
@@ -107,8 +165,10 @@ tr:hover td{background:var(--bg2);}
   <div id="dash-loading" style="text-align:center;padding:40px;color:var(--text2);"><span class="spinner"></span>Loading from Google Sheets…</div>
   <div id="dash-content" style="display:none;">
     <div class="metric-grid" id="dash-metrics"></div>
-    <div class="card"><div class="card-title">P&L by sport / league</div><div id="sport-bars"></div></div>
-    <div class="card"><div class="card-title">P&L by bet type</div><div id="type-bars"></div></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div class="card"><div class="card-title">P&L by sport / tournament / league</div><div id="sport-bars"></div></div>
+      <div class="card"><div class="card-title">P&L by bet type</div><div id="type-bars"></div></div>
+    </div>
     <div class="card"><div class="card-title">P&L by sportsbook</div><div id="book-bars"></div></div>
     <div class="card"><div class="card-title">Recent bets</div><div class="tbl-wrap"><table>
       <thead><tr><th>Date</th><th>Sport</th><th>Description</th><th>Book</th><th>Stake</th><th>P&L</th><th>Result</th></tr></thead>
@@ -116,7 +176,7 @@ tr:hover td{background:var(--bg2);}
     </table></div></div>
   </div>
 </div>
- 
+
 <!-- BETS LOG -->
 <div id="log" class="page">
   <div class="chips" id="log-chips">
@@ -135,97 +195,134 @@ tr:hover td{background:var(--bg2);}
     <tbody id="bets-table"></tbody></table>
   </div>
 </div>
- 
+
 <!-- ADD BET -->
 <div id="add" class="page">
-  <div class="card">
-    <div class="card-title">Log a bet</div>
-    <div class="form-row three">
-      <div><label>Date</label><input type="date" id="b-date"></div>
-      <div><label>Sport</label>
-        <select id="b-sport" onchange="updateLeagueField()">
-          <option value="NFL">NFL</option><option value="NBA">NBA</option>
-          <option value="Soccer">Soccer</option><option value="Golf">Golf</option><option value="Other">Other</option>
-        </select>
+  <div style="display:flex;gap:8px;margin-bottom:14px;">
+    <button id="tab-nl" class="btn primary" onclick="showNL()">Natural language</button>
+    <button id="tab-manual" class="btn" onclick="showManual()">Manual form</button>
+  </div>
+
+  <!-- NATURAL LANGUAGE -->
+  <div id="nl-tab">
+    <div class="card">
+      <div class="card-title">Type your bet naturally</div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:10px;line-height:1.7;">
+        Just type it exactly like you do in the chat. Examples:<br>
+        <em>"Caesars NBA Ant over 6.5 1st quarter vs Spurs -112 bet 33.6 won 63.6"</em><br>
+        <em>"BetMGM golf Rory birdie all par 5s Truist R1 +333 bet 15 lost"</em><br>
+        <em>"Caesars EPL Villa over 4.5 SOG vs Liverpool bet 25 won 50"</em><br>
+        <em>"DraftKings NFL Chiefs -3.5 vs Ravens bet 50 pending"</em>
       </div>
-      <div id="league-wrap" style="display:none;"><label>League</label>
-        <select id="b-league">
-          <option>Premier League</option><option>La Liga</option><option>Serie A</option>
-          <option>Bundesliga</option><option>Ligue 1</option><option>Champions League</option>
-          <option>Europa League</option><option>Conference League</option>
-          <option>Nations League</option><option>EFL</option><option>Other</option>
-        </select>
+      <div class="form-row one">
+        <div><textarea id="nl-input" placeholder="Type your bet here…" style="min-height:100px;font-size:14px;"></textarea></div>
       </div>
-    </div>
-    <div id="match-wrap" style="display:none;" class="form-row one">
-      <div><label>Match</label><input type="text" id="b-match" placeholder="e.g. Arsenal vs Man City"></div>
-    </div>
-    <div class="form-row">
-      <div><label>Sportsbook</label>
-        <select id="b-book">
-          <option>Bet365</option><option>BetMGM</option><option>Caesars</option>
-          <option>DraftKings</option><option>FanDuel</option><option>Fanatics</option>
-          <option>Underdog Fantasy</option><option>Other</option>
-        </select>
-      </div>
-      <div><label>Bet type</label>
-        <select id="b-type" onchange="updatePropFields()">
-          <option value="Moneyline">Moneyline</option><option value="Spread">Spread</option>
-          <option value="Over/Under">Over/Under</option><option value="Player Prop">Player Prop</option>
-          <option value="Team Prop">Team Prop</option><option value="Parlay">Parlay</option>
-          <option value="Long Shot Parlay">Long Shot Parlay (+1500)</option>
-          <option value="Futures">Futures</option><option value="Live Bet">Live Bet</option>
-        </select>
+      <div id="parse-error" style="display:none;color:var(--red);font-size:12px;margin-top:6px;padding:8px;background:var(--bg2);border-radius:var(--radius);"></div>
+      <div class="btn-row">
+        <button id="parse-btn" class="btn primary" onclick="parseBet()">Parse bet</button>
+        <span style="font-size:11px;color:var(--text2);" id="api-status"></span>
       </div>
     </div>
-    <div id="prop-fields" style="display:none;">
-      <div class="form-row three">
-        <div><label>Player name</label><input type="text" id="b-player" placeholder="Anthony Edwards"></div>
-        <div><label>Subcategory</label>
-          <select id="b-prop-sub">
-            <option value="Full game">Full game</option><option value="1st quarter">1st quarter</option>
-            <option value="1st half">1st half</option><option value="2nd half">2nd half</option>
-            <option value="Anytime scorer">Anytime scorer</option><option value="First scorer">First scorer</option>
-            <option value="Other">Other</option>
+    <div id="parse-result" class="parse-result">
+      <div class="card-title" style="margin-bottom:10px;">Parsed — review before saving</div>
+      <div id="parse-fields"></div>
+      <div class="btn-row" style="margin-top:14px;">
+        <button id="confirm-btn" class="btn success" onclick="confirmBet()">Confirm & save</button>
+        <button class="btn" onclick="editParsed()">Edit in form</button>
+        <button class="btn" onclick="document.getElementById('parse-result').classList.remove('show')">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MANUAL FORM -->
+  <div id="manual-tab" style="display:none;">
+    <div class="card">
+      <div class="card-title">Manual entry</div>
+      <div class="form-row" style="grid-template-columns:1fr 1fr 1fr;">
+        <div><label>Date</label><input type="date" id="b-date"></div>
+        <div><label>Sport</label>
+          <select id="b-sport" onchange="updateLeagueField()">
+            <option>NFL</option><option>NBA</option><option>Soccer</option>
+            <option>Golf</option><option>NHL</option><option>MLB</option><option>Other</option>
           </select>
         </div>
-        <div><label>Stat type</label>
-          <select id="b-stat">
-            <option>Points</option><option>Rebounds</option><option>Assists</option>
-            <option>Points + Rebounds</option><option>Points + Assists</option>
-            <option>Rebounds + Assists</option><option>PRA</option><option>Threes</option>
-            <option>Blocks</option><option>Steals</option><option>Goals</option>
-            <option>Shots on Goal</option><option>Passing yards</option><option>Rushing yards</option>
-            <option>Receiving yards</option><option>Touchdowns</option><option>Birdies</option>
-            <option>Birdies (or better)</option><option>Other</option>
+        <div><label>Sportsbook</label>
+          <select id="b-book">
+            <option>Caesars</option><option>BetMGM</option><option>DraftKings</option>
+            <option>FanDuel</option><option>Bet365</option><option>Fanatics</option><option>Underdog Fantasy</option>
           </select>
         </div>
       </div>
-      <div class="form-row three">
-        <div><label>Over / Under</label><select id="b-ou"><option>Over</option><option>Under</option></select></div>
-        <div><label>Line</label><input type="number" id="b-line" placeholder="20.5" step="0.5"></div>
-        <div><label>Opponent / matchup</label><input type="text" id="b-opp" placeholder="vs Lakers"></div>
+      <div id="league-wrap" style="display:none;">
+        <div class="form-row">
+          <div><label>League / Tournament</label>
+            <select id="b-league">
+              <option>Premier League</option><option>La Liga</option><option>Serie A</option>
+              <option>Bundesliga</option><option>Ligue 1</option><option>Champions League</option>
+              <option>Europa League</option><option>Conference League</option>
+              <option>Nations League</option><option>EFL</option>
+              <option>Truist Championship</option><option>PGA Championship</option><option>Masters</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div id="match-wrap"><label>Match / Event</label><input type="text" id="b-match" placeholder="Team A vs Team B"></div>
+        </div>
       </div>
-    </div>
-    <div class="form-row one"><div><label>Bet description</label><input type="text" id="b-desc" placeholder="e.g. Chiefs -3.5 vs Ravens"></div></div>
-    <div class="form-row three">
-      <div><label>Odds (American)</label><input type="text" id="b-odds" placeholder="-110"></div>
-      <div><label>Stake ($)</label><input type="number" id="b-stake" placeholder="25.00" step="0.01"></div>
-      <div><label>Actual return ($)</label><input type="number" id="b-return" placeholder="0.00" step="0.01"></div>
-    </div>
-    <div class="form-row">
-      <div><label>Result</label>
-        <select id="b-result"><option value="pending">Pending</option><option value="win">Win</option><option value="loss">Loss</option><option value="push">Push</option></select>
+      <div class="form-row">
+        <div><label>Bet type</label>
+          <select id="b-type" onchange="updatePropFields()">
+            <option>Moneyline</option><option>Spread</option><option>Over/Under</option>
+            <option>Player Prop</option><option>Team Prop</option><option>Parlay</option>
+            <option>Long Shot Parlay</option><option>Futures</option><option>Live Bet</option>
+          </select>
+        </div>
+        <div><label>Result</label>
+          <select id="b-result"><option value="pending">Pending</option><option value="win">Win</option><option value="loss">Loss</option><option value="push">Push</option></select>
+        </div>
       </div>
-    </div>
-    <div class="btn-row">
-      <button class="btn primary" onclick="addBet()" id="add-btn">Log bet</button>
-      <button class="btn" onclick="clearBetForm()">Clear</button>
+      <div id="prop-fields" style="display:none;">
+        <div class="form-row" style="grid-template-columns:1fr 1fr 1fr;">
+          <div><label>Player</label><input type="text" id="b-player" placeholder="Player name"></div>
+          <div><label>Subcategory</label>
+            <select id="b-prop-sub">
+              <option>Full game</option><option>Full round</option><option>1st quarter</option>
+              <option>1st half</option><option>2nd quarter</option><option>2nd half</option>
+              <option>3rd quarter</option><option>Live Bet</option><option>First scorer</option><option>NRFI</option>
+            </select>
+          </div>
+          <div><label>Stat type</label>
+            <select id="b-stat">
+              <option>Points</option><option>Rebounds</option><option>Assists</option>
+              <option>PRA</option><option>Points+Rebounds</option><option>Points+Assists</option>
+              <option>Rebounds+Assists</option><option>Threes</option>
+              <option>Birdies (or better)</option><option>Birdie all par 5s</option><option>Round score</option>
+              <option>Shots on Goal</option><option>Combined Shots on Goal</option>
+              <option>First scorer</option><option>First 3-pointer</option><option>Made 1st FG attempt</option>
+              <option>NRFI</option><option>Goals</option><option>Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row" style="grid-template-columns:1fr 1fr 1fr;">
+          <div><label>Over/Under</label><select id="b-ou"><option>Over</option><option>Under</option></select></div>
+          <div><label>Line</label><input type="number" id="b-line" placeholder="6.5" step="0.5"></div>
+          <div><label>Opponent</label><input type="text" id="b-opp" placeholder="vs Lakers"></div>
+        </div>
+      </div>
+      <div class="form-row one"><div><label>Description</label><input type="text" id="b-desc" placeholder="Brief description"></div></div>
+      <div class="form-row" style="grid-template-columns:1fr 1fr 1fr;">
+        <div><label>Odds (American)</label><input type="text" id="b-odds" placeholder="-110"></div>
+        <div><label>Stake ($)</label><input type="number" id="b-stake" placeholder="25.00" step="0.01"></div>
+        <div><label>Actual return ($)</label><input type="number" id="b-return" placeholder="0.00" step="0.01"></div>
+      </div>
+      <div class="btn-row">
+        <button id="add-btn" class="btn primary" onclick="addBet()">Log bet</button>
+        <button class="btn" onclick="clearBetForm()">Clear</button>
+      </div>
     </div>
   </div>
 </div>
- 
-<!-- PROPS TRACKER -->
+
+<!-- PROPS -->
 <div id="props" class="page">
   <div class="chips" id="props-chips">
     <button class="chip active" onclick="setPropsF('all',this)">All sports</button>
@@ -233,38 +330,52 @@ tr:hover td{background:var(--bg2);}
     <button class="chip" onclick="setPropsF('NBA',this)">NBA</button>
     <button class="chip" onclick="setPropsF('Soccer',this)">Soccer</button>
     <button class="chip" onclick="setPropsF('Golf',this)">Golf</button>
+    <button class="chip" onclick="setPropsF('NHL',this)">NHL</button>
+    <button class="chip" onclick="setPropsF('MLB',this)">MLB</button>
   </div>
   <div class="card"><div class="card-title">Player profitability</div><div id="player-board"></div></div>
   <div class="card"><div class="card-title">Best matchups</div><div class="tbl-wrap" id="matchup-wrap"></div></div>
-  <div class="card"><div class="card-title">By subcategory</div><div id="subcat-bars"></div></div>
-  <div class="card"><div class="card-title">By stat type</div><div id="stat-bars"></div></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+    <div class="card"><div class="card-title">By subcategory</div><div id="subcat-bars"></div></div>
+    <div class="card"><div class="card-title">By stat type</div><div id="stat-bars"></div></div>
+  </div>
 </div>
- 
+
 <!-- ACCOUNTS -->
 <div id="accounts" class="page">
   <div class="card"><div class="card-title">Sportsbook balances</div><div id="sb-accounts"></div></div>
-  <div class="card"><div class="card-title">Master bank account</div><div id="bank-summary"></div></div>
+  <div class="card"><div class="card-title">Bankroll overview</div><div id="bank-summary"></div></div>
   <div class="card">
     <div class="card-title">Log deposit / withdrawal / bonus</div>
-    <div class="form-row three">
+    <div class="form-row" style="grid-template-columns:1fr 1fr 1fr;">
       <div><label>Account</label>
-        <select id="t-acct"><option>Bet365</option><option>BetMGM</option><option>Caesars</option><option>DraftKings</option><option>FanDuel</option><option>Fanatics</option><option>Underdog Fantasy</option><option>Bank</option></select>
+        <select id="t-acct">
+          <option>Caesars</option><option>BetMGM</option><option>DraftKings</option>
+          <option>FanDuel</option><option>Bet365</option><option>Fanatics</option>
+          <option>Underdog Fantasy</option><option>SoFi Bank</option>
+        </select>
       </div>
-      <div><label>Type</label><select id="t-type"><option value="deposit">Deposit (from bank)</option><option value="withdraw">Withdrawal (to bank)</option><option value="bonus">Bonus / Promo</option></select></div>
+      <div><label>Type</label>
+        <select id="t-type">
+          <option value="deposit">Deposit (from bank)</option>
+          <option value="withdraw">Withdrawal (to bank)</option>
+          <option value="bonus">Bonus / Promo</option>
+        </select>
+      </div>
       <div><label>Amount ($)</label><input type="number" id="t-amt" placeholder="50.00" step="0.01"></div>
     </div>
     <div class="form-row">
       <div><label>Date</label><input type="date" id="t-date"></div>
       <div><label>Note</label><input type="text" id="t-note" placeholder="Optional"></div>
     </div>
-    <div class="btn-row"><button class="btn primary" onclick="addTx()" id="tx-btn">Log transaction</button></div>
+    <div class="btn-row"><button id="tx-btn" class="btn primary" onclick="addTx()">Log transaction</button></div>
     <div style="margin-top:16px;" class="tbl-wrap"><table style="min-width:360px;">
       <thead><tr><th>Date</th><th>Account</th><th>Type</th><th>Amount</th><th>Note</th></tr></thead>
       <tbody id="tx-table"></tbody>
     </table></div>
   </div>
 </div>
- 
+
 <!-- MISC -->
 <div id="misc" class="page">
   <div class="chips" id="misc-chips">
@@ -281,47 +392,100 @@ tr:hover td{background:var(--bg2);}
     <button class="btn" style="margin-top:12px" onclick="addMisc()">+ Add entry</button>
   </div>
 </div>
- 
+</div><!-- end #app -->
+
 <script>
-const API = 'https://script.google.com/macros/s/AKfycbzp4GRpmxE7cJWvVz46cU2-A9MbSOgTFIeTNPt464JHQ7zkvjzdN8WXRR9wGtC_j9yO/exec';
-const BOOK_COLORS = {'Bet365':'#027B5B','BetMGM':'#B8972A','Caesars':'#C9A84C','DraftKings':'#53D337','FanDuel':'#1493FF','Fanatics':'#1a1a2e','Underdog Fantasy':'#FF6B2B'};
-const BOOK_ABBR = {'Bet365':'B3','BetMGM':'MGM','Caesars':'CZR','DraftKings':'DK','FanDuel':'FD','Fanatics':'FAN','Underdog Fantasy':'UD'};
-const BOOKS = ['Bet365','BetMGM','Caesars','DraftKings','FanDuel','Fanatics','Underdog Fantasy'];
-const SPORT_COLORS = {'NFL':'#013369','NBA':'#C9082A','Soccer':'#1D9E75','Golf':'#1a6b3c','Other':'#888780'};
-const LEAGUE_COLORS = {'Premier League':'#380E62','La Liga':'#EF3340','Serie A':'#1B67B2','Bundesliga':'#D3010C','Ligue 1':'#003189','Champions League':'#1B2759','Europa League':'#F77F00','Conference League':'#00A651','Nations League':'#0057B7','EFL':'#63C3D0','Other':'#888780'};
+const SHEETS_API = 'https://script.google.com/macros/s/AKfycbzp4GRpmxE7cJWvVz46cU2-A9MbSOgTFIeTNPt464JHQ7zkvjzdN8WXRR9wGtC_j9yO/exec';
+
+const STARTING_BALANCES = {
+  'Caesars':205.71,'BetMGM':0,'DraftKings':0,'FanDuel':0,
+  'Bet365':0,'Fanatics':0,'Underdog Fantasy':0,'SoFi Bank':129.09
+};
+
+const BOOK_COLORS = {'Caesars':'#C9A84C','BetMGM':'#B8972A','DraftKings':'#53D337','FanDuel':'#1493FF','Bet365':'#027B5B','Fanatics':'#1a1a2e','Underdog Fantasy':'#FF6B2B'};
+const BOOK_ABBR = {'Caesars':'CZR','BetMGM':'MGM','DraftKings':'DK','FanDuel':'FD','Bet365':'B3','Fanatics':'FAN','Underdog Fantasy':'UD'};
+const BOOKS = ['Caesars','BetMGM','DraftKings','FanDuel','Bet365','Fanatics','Underdog Fantasy'];
+const SPORT_COLORS = {'NFL':'#013369','NBA':'#C9082A','Soccer':'#1D9E75','Golf':'#1a6b3c','NHL':'#000088','MLB':'#002D72','Other':'#888780'};
+const LEAGUE_COLORS = {
+  'Premier League':'#380E62','La Liga':'#EF3340','Serie A':'#1B67B2',
+  'Bundesliga':'#D3010C','Ligue 1':'#003189','Champions League':'#1B2759',
+  'Europa League':'#F77F00','Conference League':'#00A651','Nations League':'#0057B7','EFL':'#63C3D0',
+  'Cross-league Parlay':'#888780',
+  'Truist Championship':'#2d7a3a','PGA Championship':'#1B2759','Masters':'#32612D',
+  'NHL Playoffs R1':'#000088','NHL Playoffs R2':'#000066','NHL Regular Season':'#0000AA',
+  'MLB Regular Season':'#002D72',
+};
 const CAT_COLORS = {'Pool':'#378ADD','Bracket':'#1D9E75','Side bet':'#D85A30','Fantasy':'#7F77DD'};
- 
-let state = {bets:[],transactions:[],accounts:{},misc:[],dashP:'all',logP:'all',propsF:'all',miscF:'all'};
-let loaded = false;
- 
-function toast(msg,dur=2500){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),dur);}
- 
-async function api(payload){
-  const r = await fetch(API,{method:'POST',body:JSON.stringify(payload),headers:{'Content-Type':'text/plain'}});
+
+let state = {bets:[],transactions:[],accounts:{},misc:[],dashP:'all',logP:'all',propsF:'all',miscF:'all',parsedBet:null};
+let dataLoaded = false;
+
+// ── API KEY MANAGEMENT ──
+function getApiKey(){return localStorage.getItem('anthropic_key')||'';}
+function saveApiKey(){
+  const key=document.getElementById('setup-key').value.trim();
+  if(!key||!key.startsWith('sk-')){alert('Please enter a valid API key starting with sk-');return;}
+  localStorage.setItem('anthropic_key',key);
+  document.getElementById('setup-screen').style.display='none';
+  document.getElementById('main-ui').style.display='block';
+  document.getElementById('app').style.display='block';
+  updateApiStatus();
+  init();
+}
+function skipSetup(){
+  document.getElementById('setup-screen').style.display='none';
+  document.getElementById('main-ui').style.display='block';
+  document.getElementById('app').style.display='block';
+  init();
+}
+function showSetup(){
+  const key=getApiKey();
+  if(key)document.getElementById('setup-key').value=key;
+  document.getElementById('setup-screen').style.display='flex';
+}
+function updateApiStatus(){
+  const el=document.getElementById('api-status');
+  if(!el)return;
+  el.textContent=getApiKey()?'API key active ✓':'No API key — go to settings';
+  el.style.color=getApiKey()?'var(--green)':'var(--red)';
+}
+
+// ── INIT ──
+function init(){
+  const today=new Date().toISOString().slice(0,10);
+  document.getElementById('b-date').value=today;
+  document.getElementById('t-date').value=today;
+  updateLeagueField();updatePropFields();updateApiStatus();
+  renderDash();
+}
+
+window.addEventListener('DOMContentLoaded',()=>{
+  if(getApiKey()){
+    document.getElementById('setup-screen').style.display='none';
+    document.getElementById('main-ui').style.display='block';
+    document.getElementById('app').style.display='block';
+    init();
+  } else {
+    document.getElementById('setup-screen').style.display='flex';
+  }
+});
+
+// ── HELPERS ──
+function toast(msg,dur=2500){
+  let t=document.getElementById('toast');
+  if(!t){t=document.createElement('div');t.id='toast';t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 20px;border-radius:8px;font-size:13px;font-weight:500;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;';document.body.appendChild(t);}
+  t.textContent=msg;t.style.opacity='1';setTimeout(()=>t.style.opacity='0',dur);
+}
+async function sheetsApi(payload){
+  const r=await fetch(SHEETS_API,{method:'POST',body:JSON.stringify(payload),headers:{'Content-Type':'text/plain'}});
   return r.json();
 }
- 
-async function loadData(){
-  try{
-    const r = await api({action:'getData'});
-    if(r.ok){
-      state.bets=(r.data.bets||[]).map(b=>({...b,stake:parseFloat(b.stake)||0,actualReturn:parseFloat(b.actualReturn)||0}));
-      state.transactions=r.data.transactions||[];
-      state.accounts=r.data.accounts||{};
-      state.misc=(r.data.misc||[]).map(m=>({...m,entry:parseFloat(m.entry)||0,pl:parseFloat(m.pl)||0}));
-      BOOKS.forEach(b=>{if(!state.accounts[b])state.accounts[b]={balance:0,deposited:0,withdrawn:0};});
-      if(!state.accounts['Bank'])state.accounts['Bank']={balance:0,deposited:0,withdrawn:0};
-      loaded=true;
-    }
-  }catch(e){toast('Connection error');}
-}
- 
 function fmt(n){return(n>=0?'+':'')+fmtA(n);}
-function fmtA(n){return'$'+Math.abs(n).toFixed(2);}
-function fmtC(n){return(n<0?'-':'')+'$'+Math.abs(n).toFixed(2);}
+function fmtA(n){return'$'+Math.abs(parseFloat(n)||0).toFixed(2);}
+function fmtC(n){return(n<0?'-':'')+'$'+Math.abs(parseFloat(n)||0).toFixed(2);}
 function calcPL(b){
-  if(b.result==='win')return(b.actualReturn||0)-(b.stake||0);
-  if(b.result==='loss')return-(b.stake||0);
+  if(b.result==='win')return(parseFloat(b.actualReturn)||0)-(parseFloat(b.stake)||0);
+  if(b.result==='loss')return-(parseFloat(b.stake)||0);
   return 0;
 }
 function filterP(bets,p){
@@ -335,22 +499,42 @@ function filterP(bets,p){
     return true;
   });
 }
-function sportColor(b){return b.sport==='Soccer'?(LEAGUE_COLORS[b.league]||SPORT_COLORS.Soccer):(SPORT_COLORS[b.sport]||'#888');}
+function sportColor(b){
+  if(b.sport==='Soccer')return LEAGUE_COLORS[b.league]||SPORT_COLORS.Soccer;
+  if(b.sport==='Golf')return LEAGUE_COLORS[b.league]||SPORT_COLORS.Golf;
+  return SPORT_COLORS[b.sport]||'#888';
+}
 function sportDot(b){return`<span class="dot" style="background:${sportColor(b)}"></span>`;}
 function bookDot(book){return`<span class="dot" style="background:${BOOK_COLORS[book]||'#888'}"></span>`;}
 function badgeC(r){return r==='win'?'badge-w':r==='loss'?'badge-l':r==='push'?'badge-p':'badge-pend';}
- 
-function barRows(obj,colorFn){
+function barRows(obj,colorFn,lw=120){
   const entries=Object.entries(obj).sort((a,b)=>Math.abs(b[1])-Math.abs(a[1]));
   if(!entries.length)return'<div class="empty">No data yet</div>';
   const max=Math.max(...entries.map(([,v])=>Math.abs(v)),1);
   return entries.map(([k,v])=>`<div class="bar-row">
-    <div class="bar-label">${k}</div>
+    <div class="bar-label" style="width:${lw}px">${k}</div>
     <div class="bar-wrap"><div class="bar-fill" style="width:${Math.round(Math.abs(v)/max*100)}%;background:${v>=0?colorFn(k):'#E24B4A'}"></div></div>
     <div class="bar-num ${v>=0?'green':'red'}">${fmt(v)}</div>
   </div>`).join('');
 }
- 
+
+// ── DATA LOAD ──
+async function loadData(){
+  try{
+    const r=await sheetsApi({action:'getData'});
+    if(r.ok){
+      state.bets=(r.data.bets||[]).map(b=>({...b,stake:parseFloat(b.stake)||0,actualReturn:parseFloat(b.actualReturn)||0}));
+      state.transactions=r.data.transactions||[];
+      state.accounts=r.data.accounts||{};
+      state.misc=(r.data.misc||[]).map(m=>({...m,entry:parseFloat(m.entry)||0,pl:parseFloat(m.pl)||0}));
+      BOOKS.forEach(b=>{if(!state.accounts[b])state.accounts[b]={balance:STARTING_BALANCES[b]||0,deposited:0,withdrawn:0};});
+      if(!state.accounts['SoFi Bank'])state.accounts['SoFi Bank']={balance:STARTING_BALANCES['SoFi Bank']||0,deposited:0,withdrawn:0};
+      dataLoaded=true;
+    }
+  }catch(e){toast('Connection error — check your Sheet');}
+}
+
+// ── TAB SWITCHING ──
 function switchTab(t,el){
   document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
   document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
@@ -360,14 +544,14 @@ function switchTab(t,el){
 function setP(tab,p,el){
   if(tab==='dash'){state.dashP=p;document.querySelectorAll('#dash-chips .chip').forEach(c=>c.classList.remove('active'));}
   if(tab==='log'){state.logP=p;document.querySelectorAll('#log-chips .chip').forEach(c=>c.classList.remove('active'));}
-  el.classList.add('active');
-  tab==='dash'?renderDash():renderLog();
+  el.classList.add('active');tab==='dash'?renderDash():renderLog();
 }
 function setPropsF(p,el){state.propsF=p;document.querySelectorAll('#props-chips .chip').forEach(c=>c.classList.remove('active'));el.classList.add('active');renderProps();}
 function setMiscF(p,el){state.miscF=p;document.querySelectorAll('#misc-chips .chip').forEach(c=>c.classList.remove('active'));el.classList.add('active');renderMisc();}
- 
+
+// ── DASHBOARD ──
 async function renderDash(){
-  if(!loaded){
+  if(!dataLoaded){
     document.getElementById('dash-loading').style.display='block';
     document.getElementById('dash-content').style.display='none';
     await loadData();
@@ -378,7 +562,7 @@ async function renderDash(){
   const settled=bets.filter(b=>b.result!=='pending');
   const wins=settled.filter(b=>b.result==='win');
   const totalPL=settled.reduce((s,b)=>s+calcPL(b),0);
-  const staked=settled.reduce((s,b)=>s+b.stake,0);
+  const staked=settled.reduce((s,b)=>s+(b.stake||0),0);
   const roi=staked>0?(totalPL/staked*100):0;
   document.getElementById('dash-metrics').innerHTML=`
     <div class="metric"><div class="metric-label">Total P&L</div><div class="metric-val ${totalPL>=0?'green':'red'}">${fmt(totalPL)}</div></div>
@@ -387,19 +571,21 @@ async function renderDash(){
     <div class="metric"><div class="metric-label">ROI</div><div class="metric-val ${roi>=0?'green':'red'}">${roi>=0?'+':''}${roi.toFixed(1)}%</div></div>
     <div class="metric"><div class="metric-label">Staked</div><div class="metric-val">${fmtA(staked)}</div></div>
     <div class="metric"><div class="metric-label">Pending</div><div class="metric-val">${bets.filter(b=>b.result==='pending').length}</div></div>`;
-  const sports={},types={},books={};
+  const sportMap={},typeMap={},bookMap={};
   settled.forEach(b=>{
     const pl=calcPL(b);
-    const sk=b.sport==='Soccer'?(b.league||'Soccer'):b.sport;
-    sports[sk]=(sports[sk]||0)+pl;types[b.betType]=(types[b.betType]||0)+pl;books[b.book]=(books[b.book]||0)+pl;
+    const sk=(b.sport==='Golf'||b.sport==='Soccer')?(b.league||b.sport):b.sport;
+    sportMap[sk]=(sportMap[sk]||0)+pl;
+    typeMap[b.betType]=(typeMap[b.betType]||0)+pl;
+    bookMap[b.book]=(bookMap[b.book]||0)+pl;
   });
-  document.getElementById('sport-bars').innerHTML=barRows(sports,k=>LEAGUE_COLORS[k]||SPORT_COLORS[k]||'#888');
-  document.getElementById('type-bars').innerHTML=barRows(types,()=>'#378ADD');
-  document.getElementById('book-bars').innerHTML=barRows(books,k=>BOOK_COLORS[k]||'#888');
+  document.getElementById('sport-bars').innerHTML=barRows(sportMap,k=>LEAGUE_COLORS[k]||SPORT_COLORS[k]||'#888',130);
+  document.getElementById('type-bars').innerHTML=barRows(typeMap,()=>'#378ADD');
+  document.getElementById('book-bars').innerHTML=barRows(bookMap,k=>BOOK_COLORS[k]||'#888');
   const recent=[...state.bets].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,8);
   document.getElementById('recent-table').innerHTML=recent.length?recent.map(b=>`<tr>
     <td style="white-space:nowrap">${b.date}</td>
-    <td>${sportDot(b)}${b.sport==='Soccer'?b.league:b.sport}</td>
+    <td>${sportDot(b)}${(b.sport==='Soccer'||b.sport==='Golf')?b.league||b.sport:b.sport}</td>
     <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.player?`${b.player} ${b.ou||''} ${b.line||''} ${b.stat||''}`:b.desc||b.betType}</td>
     <td>${bookDot(b.book)}${b.book}</td>
     <td>${fmtA(b.stake)}</td>
@@ -407,7 +593,8 @@ async function renderDash(){
     <td><span class="badge ${badgeC(b.result)}">${b.result}</span></td>
   </tr>`).join(''):`<tr><td colspan="7" class="empty">No bets yet</td></tr>`;
 }
- 
+
+// ── LOG ──
 function renderLog(){
   const sf=document.getElementById('f-sport'),bf=document.getElementById('f-book'),tf=document.getElementById('f-type');
   const cs=sf.value,cb=bf.value,ct=tf.value;
@@ -424,8 +611,8 @@ function renderLog(){
   bets=[...bets].sort((a,b)=>new Date(b.date)-new Date(a.date));
   document.getElementById('bets-table').innerHTML=bets.length?bets.map(b=>`<tr>
     <td style="white-space:nowrap">${b.date}</td>
-    <td>${sportDot(b)}${b.sport==='Soccer'?(b.league||'Soccer'):b.sport}</td>
-    <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.player?`${b.player} ${b.ou||''} ${b.line||''} ${b.stat||''}`:b.desc||b.betType}</td>
+    <td>${sportDot(b)}${(b.sport==='Soccer'||b.sport==='Golf')?b.league||b.sport:b.sport}</td>
+    <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.player?`${b.player} ${b.ou||''} ${b.line||''} ${b.stat||''}`:b.desc||b.betType}</td>
     <td>${b.betType}${b.propSub?`<br><span style="font-size:10px;color:var(--text2)">${b.propSub}</span>`:''}</td>
     <td>${bookDot(b.book)}${b.book}</td>
     <td>${b.odds||'—'}</td><td>${fmtA(b.stake)}</td>
@@ -435,7 +622,157 @@ function renderLog(){
     <td><button class="btn" style="padding:3px 8px;font-size:11px;" onclick="deleteBet('${b.id}')">✕</button></td>
   </tr>`).join(''):`<tr><td colspan="11" class="empty">No bets match</td></tr>`;
 }
- 
+
+// ── NATURAL LANGUAGE PARSING ──
+async function parseBet(){
+  const raw=document.getElementById('nl-input').value.trim();
+  if(!raw){toast('Type a bet first');return;}
+  const apiKey=getApiKey();
+  if(!apiKey){toast('Add your API key in settings first');return;}
+  const btn=document.getElementById('parse-btn');
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span>Parsing…';
+  document.getElementById('parse-result').classList.remove('show');
+  document.getElementById('parse-error').style.display='none';
+  const today=new Date().toISOString().slice(0,10);
+  const systemPrompt=`You are a sports betting parser. Extract details from natural language and return ONLY valid JSON with these exact fields:
+{"date":"YYYY-MM-DD (today=${today} if not specified)","sport":"NFL|NBA|Soccer|Golf|NHL|MLB|Other","league":"Premier League|La Liga|Bundesliga|Serie A|Ligue 1|Champions League|Europa League|Conference League|Nations League|EFL|Truist Championship|PGA Championship|Masters|NHL Playoffs R2|NHL Regular Season|MLB Regular Season|Cross-league Parlay|etc","match":"Team A vs Team B","book":"Caesars|BetMGM|DraftKings|FanDuel|Bet365|Fanatics|Underdog Fantasy","betType":"Moneyline|Spread|Over/Under|Player Prop|Team Prop|Parlay|Long Shot Parlay|Futures|Live Bet","propSub":"Full game|Full round|1st quarter|1st half|2nd quarter|2nd half|3rd quarter|Live Bet|First scorer|NRFI","desc":"full description","player":"player name if applicable","stat":"Points|Rebounds|Assists|PRA|Threes|Birdies (or better)|Birdie all par 5s|Round score|Shots on Goal|Combined Shots on Goal|First scorer|First 3-pointer|Made 1st FG attempt|NRFI|Goals|etc","ou":"Over|Under","line":"number","opp":"opponent","odds":"American odds or CALCULATE","stake":0.00,"result":"win|loss|push|pending","actualReturn":0.00}
+Shorthands: Twolves/MIN=Minnesota Timberwolves, SAS/Spurs=San Antonio Spurs, Cavs/CLE=Cleveland Cavaliers, DET/Pistons=Detroit Pistons, LAL/Lakers=Los Angeles Lakers, OKC/Thunder=Oklahoma City Thunder, NYK/Knicks=New York Knicks, PHI/Sixers=Philadelphia 76ers, Dono/Donovan=Donovan Mitchell, Ant/Edwards=Anthony Edwards, City/Man City=Manchester City, Barca=FC Barcelona, PSG=Paris Saint-Germain, Villa=Aston Villa, WHU=West Ham, ManU/Man U=Manchester United, Forest=Nottingham Forest, Madrid=Real Madrid.
+SOG=Shots on Goal. NRFI=No Runs First Inning. Long Shot Parlay if odds +1500 or higher. Return ONLY the JSON, no other text.`;
+  try{
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'x-api-key':apiKey,'anthropic-version':'2023-06-01','content-type':'application/json','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:systemPrompt,messages:[{role:'user',content:raw}]})
+    });
+    const data=await resp.json();
+    if(!resp.ok)throw new Error(data.error?.message||'API error');
+    const text=data.content[0].text.trim();
+    const json=JSON.parse(text.replace(/```json|```/g,'').trim());
+    // Back-calculate odds if needed
+    if(json.odds==='CALCULATE'&&json.stake&&json.actualReturn){
+      const profit=json.actualReturn-json.stake;
+      if(profit>0)json.odds='+'+Math.round(profit/json.stake*100);
+      else json.odds='-'+Math.round(json.stake/profit*-100);
+    }
+    state.parsedBet=json;
+    showParseResult(json);
+  }catch(e){
+    document.getElementById('parse-error').style.display='block';
+    document.getElementById('parse-error').textContent='Error: '+e.message+'. Check your API key in settings.';
+  }
+  btn.disabled=false;btn.innerHTML='Parse bet';
+}
+
+function showParseResult(b){
+  const pl=b.result==='win'?(b.actualReturn-b.stake):(b.result==='loss'?-b.stake:0);
+  const fields=[
+    ['Date',b.date],['Sport',b.sport],['League / Tournament',b.league||'—'],
+    ['Match',b.match||'—'],['Sportsbook',b.book],
+    ['Bet type',b.betType+(b.propSub?' — '+b.propSub:'')],
+    ['Description',b.desc],['Player',b.player||'—'],
+    ['Stat / Line',b.player?`${b.ou||''} ${b.line||''} ${b.stat||''}`.trim():'—'],
+    ['Opponent',b.opp||'—'],['Odds',b.odds||'—'],
+    ['Stake',fmtA(b.stake)],['Return',b.actualReturn?fmtA(b.actualReturn):'—'],
+    ['Result',b.result.toUpperCase()],
+    ['P&L',`<span class="${pl>=0?'green':'red'}">${fmt(pl)}</span>`],
+  ];
+  document.getElementById('parse-fields').innerHTML=fields.map(([k,v])=>`<div class="parse-field"><span class="parse-key">${k}</span><span class="parse-val">${v}</span></div>`).join('');
+  document.getElementById('parse-result').classList.add('show');
+}
+
+async function confirmBet(){
+  if(!state.parsedBet){toast('Parse a bet first');return;}
+  const btn=document.getElementById('confirm-btn');
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span>Saving…';
+  try{
+    const bet={...state.parsedBet};
+    const r=await sheetsApi({action:'addBet',bet});
+    if(r.ok){
+      bet.id=r.id;state.bets.push(bet);
+      toast('Saved ✓');
+      document.getElementById('nl-input').value='';
+      document.getElementById('parse-result').classList.remove('show');
+      state.parsedBet=null;
+    }else toast('Error saving — try again');
+  }catch(e){toast('Connection error');}
+  btn.disabled=false;btn.innerHTML='Confirm & save';
+}
+
+function editParsed(){
+  if(!state.parsedBet)return;
+  const b=state.parsedBet;
+  document.getElementById('b-date').value=b.date||'';
+  document.getElementById('b-sport').value=b.sport||'NBA';
+  document.getElementById('b-book').value=b.book||'Caesars';
+  document.getElementById('b-type').value=b.betType||'Moneyline';
+  document.getElementById('b-desc').value=b.desc||'';
+  document.getElementById('b-odds').value=b.odds||'';
+  document.getElementById('b-stake').value=b.stake||'';
+  document.getElementById('b-return').value=b.actualReturn||'';
+  document.getElementById('b-result').value=b.result||'pending';
+  document.getElementById('b-player').value=b.player||'';
+  document.getElementById('b-line').value=b.line||'';
+  document.getElementById('b-opp').value=b.opp||'';
+  updateLeagueField();
+  if(b.sport==='Soccer'||b.sport==='Golf'){
+    try{document.getElementById('b-league').value=b.league||'';}catch(e){}
+    document.getElementById('b-match').value=b.match||'';
+  }
+  updatePropFields();
+  if(b.betType==='Player Prop'){
+    try{document.getElementById('b-prop-sub').value=b.propSub||'Full game';}catch(e){}
+    try{document.getElementById('b-stat').value=b.stat||'Points';}catch(e){}
+    document.getElementById('b-ou').value=b.ou||'Over';
+  }
+  showManual();
+  toast('Filled in form — review and save');
+}
+
+// ── MANUAL FORM ──
+function updateLeagueField(){
+  const s=document.getElementById('b-sport').value;
+  const show=s==='Soccer'||s==='Golf';
+  document.getElementById('league-wrap').style.display=show?'block':'none';
+}
+function updatePropFields(){
+  document.getElementById('prop-fields').style.display=document.getElementById('b-type').value==='Player Prop'?'block':'none';
+}
+function clearBetForm(){
+  ['b-desc','b-odds','b-stake','b-return','b-player','b-line','b-opp','b-match'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('b-result').value='pending';document.getElementById('b-type').value='Moneyline';updatePropFields();
+}
+async function addBet(){
+  const btn=document.getElementById('add-btn');
+  const stake=parseFloat(document.getElementById('b-stake').value)||0;
+  if(!stake){toast('Enter a stake amount');return;}
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span>Saving…';
+  const sport=document.getElementById('b-sport').value;
+  const bet={
+    date:document.getElementById('b-date').value||new Date().toISOString().slice(0,10),
+    sport,league:(sport==='Soccer'||sport==='Golf')?document.getElementById('b-league').value:'',
+    match:(sport==='Soccer'||sport==='Golf')?document.getElementById('b-match').value:'',
+    book:document.getElementById('b-book').value,betType:document.getElementById('b-type').value,
+    desc:document.getElementById('b-desc').value,odds:document.getElementById('b-odds').value,
+    stake,result:document.getElementById('b-result').value,
+    actualReturn:parseFloat(document.getElementById('b-return').value)||0,
+    player:document.getElementById('b-player').value,propSub:document.getElementById('b-prop-sub').value,
+    stat:document.getElementById('b-stat').value,ou:document.getElementById('b-ou').value,
+    line:document.getElementById('b-line').value,opp:document.getElementById('b-opp').value
+  };
+  try{
+    const r=await sheetsApi({action:'addBet',bet});
+    if(r.ok){bet.id=r.id;state.bets.push(bet);toast('Saved ✓');clearBetForm();}
+    else toast('Error saving');
+  }catch(e){toast('Connection error');}
+  btn.disabled=false;btn.innerHTML='Log bet';
+}
+async function deleteBet(id){
+  if(!confirm('Delete this bet?'))return;
+  try{await sheetsApi({action:'deleteBet',id});state.bets=state.bets.filter(b=>b.id!=id);renderLog();toast('Deleted');}
+  catch(e){toast('Error');}
+}
+
+// ── PROPS ──
 function renderProps(){
   const pb=state.bets.filter(b=>b.betType==='Player Prop'&&(state.propsF==='all'||b.sport===state.propsF));
   const settled=pb.filter(b=>b.result!=='pending');
@@ -449,7 +786,7 @@ function renderProps(){
   });
   const players=Object.entries(pm).sort((a,b)=>b[1].pl-a[1].pl);
   document.getElementById('player-board').innerHTML=players.length?players.map(([name,d])=>`
-    <div class="player-card">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);">
       <div><div style="font-weight:600;font-size:13px">${name}</div>
       <div style="font-size:11px;color:var(--text2)">${d.bets} bets · ${d.wins}W ${d.losses}L · ${d.bets?Math.round(d.wins/d.bets*100):0}% win rate</div></div>
       <div class="${d.pl>=0?'green':'red'}" style="font-weight:600">${fmt(d.pl)}</div>
@@ -459,10 +796,9 @@ function renderProps(){
     if(!b.player||!b.opp)return;
     const k=`${b.player} vs ${b.opp}`;
     if(!mm[k])mm[k]={pl:0,bets:0,wins:0};
-    mm[k].pl+=calcPL(b);mm[k].bets++;
-    if(b.result==='win')mm[k].wins++;
+    mm[k].pl+=calcPL(b);mm[k].bets++;if(b.result==='win')mm[k].wins++;
   });
-  const matchups=Object.entries(mm).sort((a,b)=>b[1].pl-a[1].pl).slice(0,8);
+  const matchups=Object.entries(mm).sort((a,b)=>b[1].pl-a[1].pl).slice(0,10);
   document.getElementById('matchup-wrap').innerHTML=matchups.length?`<table style="min-width:300px;">
     <thead><tr><th>Matchup</th><th>Bets</th><th>Win%</th><th>P&L</th></tr></thead>
     <tbody>${matchups.map(([k,d])=>`<tr><td>${k}</td><td>${d.bets}</td>
@@ -474,39 +810,60 @@ function renderProps(){
   document.getElementById('subcat-bars').innerHTML=barRows(sm,()=>'#378ADD');
   document.getElementById('stat-bars').innerHTML=barRows(stm,()=>'#1D9E75');
 }
- 
+
+// ── ACCOUNTS ──
 function renderAccounts(){
   document.getElementById('sb-accounts').innerHTML=BOOKS.map(b=>{
-    const a=state.accounts[b]||{balance:0,deposited:0,withdrawn:0};
-    const pl=(parseFloat(a.balance)||0)+(parseFloat(a.withdrawn)||0)-(parseFloat(a.deposited)||0);
+    const a=state.accounts[b]||{balance:STARTING_BALANCES[b]||0,deposited:0,withdrawn:0};
+    const bal=parseFloat(a.balance)||0,dep=parseFloat(a.deposited)||0,wit=parseFloat(a.withdrawn)||0;
+    const pl=bal+wit-dep;
     return`<div class="acct-row">
       <div class="acct-left">
         <div class="acct-icon" style="background:${BOOK_COLORS[b]}">${BOOK_ABBR[b]}</div>
         <div><div class="acct-name">${b}</div>
-        <div class="acct-sub">In: ${fmtA(parseFloat(a.deposited)||0)} · Out: ${fmtA(parseFloat(a.withdrawn)||0)} · P&L: <span class="${pl>=0?'green':'red'}">${fmt(pl)}</span></div></div>
+        <div class="acct-sub">Deposited: ${fmtA(dep)} · Withdrawn: ${fmtA(wit)} · P&L: <span class="${pl>=0?'green':'red'}">${fmt(pl)}</span></div></div>
       </div>
-      <div class="acct-bal ${(parseFloat(a.balance)||0)>=0?'green':'red'}" style="font-size:16px;font-weight:600;">${fmtC(parseFloat(a.balance)||0)}</div>
+      <div class="${bal>=0?'green':'red'}" style="font-size:16px;font-weight:600;">${fmtC(bal)}</div>
     </div>`;
   }).join('');
-  const bank=state.accounts['Bank']||{balance:0};
-  const sbTotal=BOOKS.reduce((s,b)=>s+(parseFloat(state.accounts[b]?.balance)||0),0);
+  const sbTotal=BOOKS.reduce((s,b)=>s+(parseFloat(state.accounts[b]?.balance)||STARTING_BALANCES[b]||0),0);
+  const bankBal=parseFloat(state.accounts['SoFi Bank']?.balance)||STARTING_BALANCES['SoFi Bank']||0;
   const miscTotal=(state.misc||[]).reduce((s,e)=>s+(parseFloat(e.pl)||0),0);
-  const grand=(parseFloat(bank.balance)||0)+sbTotal+miscTotal;
-  document.getElementById('bank-summary').innerHTML=`<div class="metric-grid" style="grid-template-columns:repeat(2,1fr);">
-    <div class="metric"><div class="metric-label">Bank balance</div><div class="metric-val ${(parseFloat(bank.balance)||0)>=0?'green':'red'}">${fmtC(parseFloat(bank.balance)||0)}</div></div>
-    <div class="metric"><div class="metric-label">All sportsbooks</div><div class="metric-val ${sbTotal>=0?'green':'red'}">${fmtC(sbTotal)}</div></div>
-    <div class="metric"><div class="metric-label">Fantasy / misc</div><div class="metric-val ${miscTotal>=0?'green':'red'}">${fmt(miscTotal)}</div></div>
-    <div class="metric"><div class="metric-label">Total bankroll</div><div class="metric-val ${grand>=0?'green':'red'}">${fmtC(grand)}</div></div>
-  </div>`;
+  const grand=sbTotal+bankBal+miscTotal;
+  document.getElementById('bank-summary').innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);">
+      <div><div class="acct-name">SoFi Bank</div><div class="acct-sub">Master account</div></div>
+      <div class="${bankBal>=0?'green':'red'}" style="font-size:16px;font-weight:600;">${fmtC(bankBal)}</div>
+    </div>
+    <div class="metric-grid" style="grid-template-columns:repeat(2,1fr);margin-top:12px;">
+      <div class="metric"><div class="metric-label">All sportsbooks</div><div class="metric-val ${sbTotal>=0?'green':'red'}">${fmtC(sbTotal)}</div></div>
+      <div class="metric"><div class="metric-label">SoFi Bank</div><div class="metric-val ${bankBal>=0?'green':'red'}">${fmtC(bankBal)}</div></div>
+      <div class="metric"><div class="metric-label">Fantasy / misc</div><div class="metric-val ${miscTotal>=0?'green':'red'}">${fmt(miscTotal)}</div></div>
+      <div class="metric" style="background:var(--bg3);"><div class="metric-label" style="font-weight:600;">Total bankroll</div><div class="metric-val ${grand>=0?'green':'red'}">${fmtC(grand)}</div></div>
+    </div>`;
   const txs=[...(state.transactions||[])].sort((a,b)=>new Date(b.date)-new Date(a.date));
   document.getElementById('tx-table').innerHTML=txs.length?txs.map(t=>`<tr>
     <td style="white-space:nowrap">${t.date}</td><td>${bookDot(t.acct)}${t.acct}</td>
     <td><span class="badge ${t.type==='deposit'?'badge-l':t.type==='bonus'?'badge-p':'badge-w'}">${t.type}</span></td>
-    <td class="${t.type==='withdraw'?'green':'red'}">${t.type==='withdraw'?'+':'-'}${fmtA(parseFloat(t.amount)||0)}</td>
+    <td class="${t.type==='withdraw'?'green':'red'}">${t.type==='withdraw'?'+':'-'}${fmtA(t.amount)}</td>
     <td style="color:var(--text2)">${t.note||'—'}</td>
   </tr>`).join(''):`<tr><td colspan="5" class="empty">No transactions yet</td></tr>`;
 }
- 
+async function addTx(){
+  const btn=document.getElementById('tx-btn');
+  const amount=parseFloat(document.getElementById('t-amt').value)||0;
+  if(!amount){toast('Enter an amount');return;}
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span>Saving…';
+  const tx={date:document.getElementById('t-date').value||new Date().toISOString().slice(0,10),acct:document.getElementById('t-acct').value,type:document.getElementById('t-type').value,amount,note:document.getElementById('t-note').value};
+  try{
+    const r=await sheetsApi({action:'addTransaction',transaction:tx});
+    if(r.ok){await loadData();renderAccounts();toast('Saved ✓');document.getElementById('t-amt').value='';document.getElementById('t-note').value='';}
+    else toast('Error saving');
+  }catch(e){toast('Connection error');}
+  btn.disabled=false;btn.innerHTML='Log transaction';
+}
+
+// ── MISC ──
 function renderMisc(){
   const entries=(state.misc||[]).filter(e=>state.miscF==='all'||e.category===state.miscF);
   const total=entries.reduce((s,e)=>s+(parseFloat(e.pl)||0),0);
@@ -520,7 +877,7 @@ function renderMisc(){
       <div class="acct-left">
         <div class="acct-icon" style="background:${CAT_COLORS[e.category]||'#888'}">${(e.category||'').slice(0,2).toUpperCase()}</div>
         <div><div class="acct-name">${e.name}</div>
-        <div class="acct-sub">${e.category} · ${e.season||e.date||''} · Entry: ${fmtA(parseFloat(e.entry)||0)}${e.status?' · '+e.status:''}</div></div>
+        <div class="acct-sub">${e.category} · ${e.season||e.date||''} · Entry: ${fmtA(e.entry)}${e.status?' · '+e.status:''}</div></div>
       </div>
       <div style="display:flex;align-items:center;gap:10px;">
         <div class="${(parseFloat(e.pl)||0)>=0?'green':'red'}" style="font-weight:600">${fmt(parseFloat(e.pl)||0)}</div>
@@ -528,100 +885,28 @@ function renderMisc(){
       </div>
     </div>`).join(''):`<div class="empty">No entries yet</div>`;
 }
- 
-function updateLeagueField(){
-  const s=document.getElementById('b-sport').value;
-  document.getElementById('league-wrap').style.display=s==='Soccer'?'block':'none';
-  document.getElementById('match-wrap').style.display=s==='Soccer'?'grid':'none';
-}
-function updatePropFields(){
-  document.getElementById('prop-fields').style.display=document.getElementById('b-type').value==='Player Prop'?'block':'none';
-}
-function clearBetForm(){
-  ['b-desc','b-odds','b-stake','b-return','b-player','b-line','b-opp','b-match'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  document.getElementById('b-result').value='pending';document.getElementById('b-type').value='Moneyline';updatePropFields();
-}
- 
-async function addBet(){
-  const btn=document.getElementById('add-btn');
-  const stake=parseFloat(document.getElementById('b-stake').value)||0;
-  if(!stake){toast('Enter a stake amount.');return;}
-  btn.disabled=true;btn.innerHTML='<span class="spinner"></span>Saving…';
-  const sport=document.getElementById('b-sport').value;
-  const bet={
-    date:document.getElementById('b-date').value||new Date().toISOString().slice(0,10),
-    sport,league:sport==='Soccer'?document.getElementById('b-league').value:'',
-    match:sport==='Soccer'?document.getElementById('b-match').value:'',
-    book:document.getElementById('b-book').value,
-    betType:document.getElementById('b-type').value,
-    desc:document.getElementById('b-desc').value,
-    odds:document.getElementById('b-odds').value,
-    stake,result:document.getElementById('b-result').value,
-    actualReturn:parseFloat(document.getElementById('b-return').value)||0,
-    player:document.getElementById('b-player').value,
-    propSub:document.getElementById('b-prop-sub').value,
-    stat:document.getElementById('b-stat').value,
-    ou:document.getElementById('b-ou').value,
-    line:document.getElementById('b-line').value,
-    opp:document.getElementById('b-opp').value
-  };
-  try{
-    const r=await api({action:'addBet',bet});
-    if(r.ok){bet.id=r.id;state.bets.push(bet);toast('Saved ✓');clearBetForm();}
-    else toast('Error saving');
-  }catch(e){toast('Connection error');}
-  btn.disabled=false;btn.innerHTML='Log bet';
-}
- 
-async function deleteBet(id){
-  if(!confirm('Delete this bet?'))return;
-  try{await api({action:'deleteBet',id});state.bets=state.bets.filter(b=>b.id!=id);renderLog();toast('Deleted');}
-  catch(e){toast('Error');}
-}
- 
-async function addTx(){
-  const btn=document.getElementById('tx-btn');
-  const amount=parseFloat(document.getElementById('t-amt').value)||0;
-  if(!amount){toast('Enter an amount.');return;}
-  btn.disabled=true;btn.innerHTML='<span class="spinner"></span>Saving…';
-  const tx={date:document.getElementById('t-date').value||new Date().toISOString().slice(0,10),acct:document.getElementById('t-acct').value,type:document.getElementById('t-type').value,amount,note:document.getElementById('t-note').value};
-  try{
-    const r=await api({action:'addTransaction',transaction:tx});
-    if(r.ok){await loadData();renderAccounts();toast('Saved ✓');document.getElementById('t-amt').value='';document.getElementById('t-note').value='';}
-    else toast('Error saving');
-  }catch(e){toast('Connection error');}
-  btn.disabled=false;btn.innerHTML='Log transaction';
-}
- 
 async function addMisc(){
   const cats=['Pool','Bracket','Side bet','Fantasy'];
-  const catNum=parseInt(prompt(`Category:\n1. Pool\n2. Bracket\n3. Side bet\n4. Fantasy`));
+  const catNum=parseInt(prompt('Category:\n1. Pool\n2. Bracket\n3. Side bet\n4. Fantasy'));
   if(!catNum||catNum<1||catNum>4)return;
-  const category=cats[catNum-1];
   const name=prompt('Name?');if(!name)return;
   const season=prompt('Season / year?')||new Date().getFullYear().toString();
   const entry=parseFloat(prompt('Entry cost ($)?'))||0;
   const winnings=parseFloat(prompt('Winnings so far ($)? (0 if active)'))||0;
-  const misc={category,name,season,entry,pl:winnings-entry,status:winnings>0?'Completed':'Active',date:new Date().toISOString().slice(0,10)};
+  const misc={category:cats[catNum-1],name,season,entry,pl:winnings-entry,status:winnings>0?'Completed':'Active',date:new Date().toISOString().slice(0,10)};
   try{
-    const r=await api({action:'addMisc',misc});
+    const r=await sheetsApi({action:'addMisc',misc});
     if(r.ok){misc.id=r.id||Date.now();state.misc.push(misc);renderMisc();toast('Saved ✓');}
-    else toast('Error saving');
   }catch(e){toast('Connection error');}
 }
- 
 async function deleteMisc(id){
   if(!confirm('Delete?'))return;
-  try{await api({action:'deleteMisc',id});state.misc=state.misc.filter(m=>m.id!=id);renderMisc();toast('Deleted');}
+  try{await sheetsApi({action:'deleteMisc',id});state.misc=state.misc.filter(m=>m.id!=id);renderMisc();toast('Deleted');}
   catch(e){toast('Error');}
 }
- 
-const today=new Date().toISOString().slice(0,10);
-document.getElementById('b-date').value=today;
-document.getElementById('t-date').value=today;
-updateLeagueField();updatePropFields();
-renderDash();
+
+function showNL(){document.getElementById('nl-tab').style.display='block';document.getElementById('manual-tab').style.display='none';document.getElementById('tab-nl').classList.add('active');document.getElementById('tab-manual').classList.remove('active');}
+function showManual(){document.getElementById('manual-tab').style.display='block';document.getElementById('nl-tab').style.display='none';document.getElementById('tab-manual').classList.add('active');document.getElementById('tab-nl').classList.remove('active');}
 </script>
 </body>
 </html>
- 
