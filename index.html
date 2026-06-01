@@ -485,11 +485,39 @@ function updateSortHeaders(table){
   });
 }
 
+// Parse date from any format (YYYY-MM-DD, DD/MM/YYYY, ISO timestamp) to Date object
+function parseDate(raw){
+  if(!raw) return new Date(0);
+  const s = String(raw);
+  // ISO timestamp
+  if(s.includes('T')) return new Date(s);
+  // DD/MM/YYYY
+  if(s.match(/^\d{2}\/\d{2}\/\d{4}$/)){
+    const [d,m,y]=s.split('/');
+    return new Date(`${y}-${m}-${d}`);
+  }
+  // YYYY-MM-DD
+  return new Date(s);
+}
+
+// Format any date string to DD/MM/YYYY for display
+function fmtDate(raw){
+  if(!raw) return '—';
+  const d = parseDate(raw);
+  if(isNaN(d)) return String(raw).slice(0,10);
+  return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+}
+
 function sortData(arr,col,dir){
   return [...arr].sort((a,b)=>{
     let va=a[col]??'', vb=b[col]??'';
     if(col==='pl'){va=calcPL(a);vb=calcPL(b);}
     if(col==='winPct'){va=a.bets?a.wins/a.bets:0;vb=b.bets?b.wins/b.bets:0;}
+    // Date columns — always sort by real date value
+    if(col==='date'){
+      const da=parseDate(va), db=parseDate(vb);
+      return dir==='asc'?da-db:db-da;
+    }
     const numA=parseFloat(va), numB=parseFloat(vb);
     let cmp;
     if(!isNaN(numA)&&!isNaN(numB)) cmp=numA-numB;
@@ -565,7 +593,7 @@ function filterP(bets,p){
   const now=new Date();
   return bets.filter(b=>{
     if(p==='all')return true;
-    const bd=new Date(b.date);
+    const bd=parseDate(b.date);
     if(p==='today')return bd.toDateString()===now.toDateString();
     if(p==='week'){const w=new Date(now);w.setDate(now.getDate()-7);return bd>=w;}
     if(p==='month')return bd.getMonth()===now.getMonth()&&bd.getFullYear()===now.getFullYear();
@@ -655,9 +683,9 @@ async function renderDash(){
   document.getElementById('sport-bars').innerHTML=barRows(sportMap,k=>LEAGUE_COLORS[k]||SPORT_COLORS[k]||'#888',130);
   document.getElementById('type-bars').innerHTML=barRows(typeMap,()=>'#378ADD');
   document.getElementById('book-bars').innerHTML=barRows(bookMap,k=>BOOK_COLORS[k]||'#888');
-  const recent=[...state.bets].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,8);
+  const recent=[...state.bets].sort((a,b)=>parseDate(b.date)-parseDate(a.date)).slice(0,8);
   document.getElementById('recent-table').innerHTML=recent.length?recent.map(b=>`<tr>
-    <td style="white-space:nowrap">${b.date}</td>
+    <td style="white-space:nowrap">${fmtDate(b.date)}</td>
     <td>${sportDot(b)}${(b.sport==='Soccer'||b.sport==='Golf')?b.league||b.sport:b.sport}</td>
     <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.player?`${b.player} ${b.ou||''} ${b.line||''} ${b.stat||''}`:b.desc||b.betType}</td>
     <td>${bookDot(b.book)}${b.book}</td>
@@ -686,7 +714,7 @@ function renderLog(){
   bets=sortData(bets,sortState.bets.col,sortState.bets.dir);
   updateSortHeaders('bets');
   document.getElementById('bets-table').innerHTML=bets.length?bets.map(b=>`<tr>
-    <td style="white-space:nowrap">${b.date}</td>
+    <td style="white-space:nowrap">${fmtDate(b.date)}</td>
     <td>${sportDot(b)}${(b.sport==='Soccer'||b.sport==='Golf')?b.league||b.sport:b.sport}</td>
     <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.player?`${b.player} ${b.ou||''} ${b.line||''} ${b.stat||''}`:b.desc||b.betType}</td>
     <td>${b.betType}${b.propSub?`<br><span style="font-size:10px;color:var(--text2)">${b.propSub}</span>`:''}</td>
@@ -928,7 +956,7 @@ function renderAccounts(){
   txs=sortData(txs,sortState.transactions.col,sortState.transactions.dir);
   updateSortHeaders('transactions');
   document.getElementById('tx-table').innerHTML=txs.length?txs.map(t=>`<tr>
-    <td style="white-space:nowrap">${t.date}</td>
+    <td style="white-space:nowrap">${fmtDate(t.date)}</td>
     <td>${bookDot(t.acct)}${t.acct}</td>
     <td><span class="badge ${t.type==='deposit'?'badge-l':t.type==='bonus'?'badge-p':'badge-w'}">${t.type}</span></td>
     <td class="${t.type==='withdraw'?'green':'red'}">${t.type==='withdraw'?'+':'-'}${fmtA(t.amount)}</td>
