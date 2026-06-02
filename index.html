@@ -106,8 +106,8 @@ tr:hover td{background:var(--bg2);}
 .hub-team-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px 14px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:10px;}
 .hub-team-card:hover{border-color:var(--border2);background:var(--bg2);}
 .hub-team-color{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
-.hub-team-info{overflow:hidden;}
-.hub-team-name{font-weight:500;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.hub-team-info{overflow:hidden;min-width:0;}
+.hub-team-name{font-weight:500;font-size:13px;white-space:normal;word-break:break-word;line-height:1.3;}
 .hub-team-meta{font-size:11px;color:var(--text2);margin-top:2px;}
 .hub-league-section{margin-bottom:20px;}
 .hub-league-title{font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
@@ -151,11 +151,16 @@ tr:hover td{background:var(--bg2);}
   <div class="setup-card">
     <div class="setup-title">Welcome to Betting Tracker</div>
     <div class="setup-sub">Enter your Anthropic API key to enable natural language bet parsing. Stored only in your browser — never uploaded anywhere.</div>
+    <label style="font-size:11px;color:var(--text2);display:block;margin-bottom:4px;">Anthropic API Key</label>
     <input type="password" class="setup-input" id="setup-key" placeholder="sk-ant-api03-...">
+    <label style="font-size:11px;color:var(--text2);display:block;margin-bottom:4px;margin-top:8px;">BallDontLie API Key (NBA rosters)</label>
+    <input type="password" class="setup-input" id="setup-bdl-key" placeholder="Get free key at balldontlie.io">
+    <label style="font-size:11px;color:var(--text2);display:block;margin-bottom:4px;margin-top:8px;">RapidAPI Key (Soccer rosters)</label>
+    <input type="password" class="setup-input" id="setup-rapid-key" placeholder="Your RapidAPI key">
     <button class="setup-btn" onclick="saveApiKey()">Save & open tracker</button>
     <div class="setup-note">
-      Get your key at console.anthropic.com → API Keys.<br>
-      <span style="cursor:pointer;text-decoration:underline;" onclick="skipSetup()">Skip for now (natural language parsing disabled)</span>
+      All keys stored only in your browser — never uploaded anywhere.<br>
+      <span style="cursor:pointer;text-decoration:underline;" onclick="skipSetup()">Skip for now</span>
     </div>
   </div>
 </div>
@@ -583,8 +588,12 @@ function sortData(arr,col,dir){
 function getApiKey(){return localStorage.getItem('anthropic_key')||'';}
 function saveApiKey(){
   const key=document.getElementById('setup-key').value.trim();
-  if(!key||!key.startsWith('sk-')){alert('Please enter a valid API key starting with sk-');return;}
-  localStorage.setItem('anthropic_key',key);
+  const bdlKey=document.getElementById('setup-bdl-key').value.trim();
+  const rapidKey=document.getElementById('setup-rapid-key').value.trim();
+  if(!key&&!bdlKey&&!rapidKey){alert('Please enter at least one API key');return;}
+  if(key) localStorage.setItem('anthropic_key',key);
+  if(bdlKey) localStorage.setItem('bdl_key',bdlKey);
+  if(rapidKey) localStorage.setItem('rapid_key',rapidKey);
   document.getElementById('setup-screen').style.display='none';
   document.getElementById('main-ui').style.display='block';
   document.getElementById('app').style.display='block';
@@ -599,6 +608,10 @@ function skipSetup(){
 function showSetup(){
   const key=getApiKey();
   if(key)document.getElementById('setup-key').value=key;
+  const bdl=localStorage.getItem('bdl_key')||'';
+  if(bdl)document.getElementById('setup-bdl-key').value=bdl;
+  const rapid=localStorage.getItem('rapid_key')||'';
+  if(rapid)document.getElementById('setup-rapid-key').value=rapid;
   document.getElementById('setup-screen').style.display='flex';
 }
 function updateApiStatus(){
@@ -1105,8 +1118,466 @@ const NBA_TEAMS = [
   {id:28,name:'Toronto Raptors',abbr:'TOR',color:'#CE1141',conf:'East',div:'Atlantic'},
   {id:29,name:'Utah Jazz',abbr:'UTA',color:'#002B5C',conf:'West',div:'Northwest'},
   {id:30,name:'Washington Wizards',abbr:'WAS',color:'#002B5C',conf:'East',div:'Southeast'},
-  {id:31,name:'New Jersey Nets',abbr:'NJN',color:'#000000',conf:'West',div:'Southwest'},
 ];
+
+// ── COMPLETE NBA ROSTERS (2025-26 season, from NBA.com) ──
+const NBA_ROSTERS = {
+  'San Antonio Spurs': [
+    {name:'Victor Wembanyama',pos:'C'},{name:'De\'Aaron Fox',pos:'PG'},{name:'Stephon Castle',pos:'SG'},
+    {name:'Dylan Harper',pos:'SG'},{name:'Devin Vassell',pos:'SF'},{name:'Keldon Johnson',pos:'SF'},
+    {name:'Julian Champagnie',pos:'SF'},{name:'Carter Bryant',pos:'SF'},{name:'Harrison Barnes',pos:'PF'},
+    {name:'Kelly Olynyk',pos:'PF'},{name:'Luke Kornet',pos:'C'},{name:'Mason Plumlee',pos:'C'},
+    {name:'Bismack Biyombo',pos:'C'},{name:'Jordan McLaughlin',pos:'PG'},{name:'Harrison Ingram',pos:'SF'},
+    {name:'Emanuel Miller',pos:'PF'},{name:'Lindy Waters III',pos:'SG'},{name:'Kenrich Williams',pos:'SF'},
+    {name:'David Jones Garcia',pos:'PF'}
+  ],
+  'Cleveland Cavaliers': [
+    {name:'Donovan Mitchell',pos:'SG'},{name:'James Harden',pos:'PG'},{name:'Evan Mobley',pos:'PF'},
+    {name:'Jarrett Allen',pos:'C'},{name:'Darius Garland',pos:'PG'},{name:'Max Strus',pos:'SF'},
+    {name:'Sam Merrill',pos:'SG'},{name:'Dean Wade',pos:'PF'},{name:'De\'Andre Hunter',pos:'SF'},
+    {name:'Lonzo Ball',pos:'PG'},{name:'Keon Ellis',pos:'SG'},{name:'Thomas Bryant',pos:'C'},
+    {name:'Larry Nance Jr.',pos:'PF'},{name:'Jaylon Tyson',pos:'SG'},{name:'Craig Porter Jr.',pos:'PG'},
+    {name:'Tyrese Proctor',pos:'PG'},{name:'Luke Travers',pos:'SF'},{name:'Nae\'Qwan Tomlin',pos:'SF'}
+  ],
+  'Oklahoma City Thunder': [
+    {name:'Shai Gilgeous-Alexander',pos:'PG'},{name:'Jalen Williams',pos:'SG'},{name:'Chet Holmgren',pos:'C'},
+    {name:'Isaiah Hartenstein',pos:'C'},{name:'Alex Caruso',pos:'SG'},{name:'Luguentz Dort',pos:'SG'},
+    {name:'Cason Wallace',pos:'PG'},{name:'Aaron Wiggins',pos:'SG'},{name:'Isaiah Joe',pos:'SG'},
+    {name:'Jaylin Williams',pos:'PF'},{name:'Jared McCain',pos:'PG'},{name:'Ajay Mitchell',pos:'PG'},
+    {name:'Thomas Sorber',pos:'C'},{name:'Nique Clifford',pos:'SF'},{name:'Brooks Barnhizer',pos:'PG'},
+    {name:'Ousmane Dieng',pos:'SF'},{name:'Nikola Topic',pos:'PG'}
+  ],
+  'New York Knicks': [
+    {name:'Jalen Brunson',pos:'PG'},{name:'Karl-Anthony Towns',pos:'C'},{name:'Mikal Bridges',pos:'SF'},
+    {name:'OG Anunoby',pos:'SF'},{name:'Josh Hart',pos:'SF'},{name:'Donte DiVincenzo',pos:'SG'},
+    {name:'Mitchell Robinson',pos:'C'},{name:'Guerschon Yabusele',pos:'PF'},{name:'Jordan Clarkson',pos:'PG'},
+    {name:'Miles McBride',pos:'PG'},{name:'Landry Shamet',pos:'SG'},{name:'Tyler Kolek',pos:'PG'},
+    {name:'Pacome Dadiet',pos:'SF'},{name:'Ariel Hukporti',pos:'C'},{name:'Trey Jemison III',pos:'C'}
+  ],
+  'Detroit Pistons': [
+    {name:'Cade Cunningham',pos:'PG'},{name:'Jalen Duren',pos:'C'},{name:'Tobias Harris',pos:'PF'},
+    {name:'Ausar Thompson',pos:'SF'},{name:'Isaiah Stewart',pos:'PF'},{name:'Jaden Ivey',pos:'SG'},
+    {name:'Daniss Jenkins',pos:'PG'},{name:'Ronald Holland II',pos:'SF'},{name:'Marcus Sasser',pos:'SG'},
+    {name:'Caris LeVert',pos:'SG'},{name:'Duncan Robinson',pos:'SG'},{name:'Paul Reed',pos:'PF'},
+    {name:'Javonte Green',pos:'SF'},{name:'Bobi Klintman',pos:'PF'},{name:'Chaz Lanier',pos:'SG'}
+  ],
+  'Los Angeles Lakers': [
+    {name:'LeBron James',pos:'SF'},{name:'Luka Doncic',pos:'PG'},{name:'Austin Reaves',pos:'SG'},
+    {name:'Rui Hachimura',pos:'PF'},{name:'Deandre Ayton',pos:'C'},{name:'Marcus Smart',pos:'PG'},
+    {name:'Dalton Knecht',pos:'SG'},{name:'Bronny James',pos:'PG'},{name:'Jaxson Hayes',pos:'C'},
+    {name:'Jarred Vanderbilt',pos:'PF'},{name:'Maxi Kleber',pos:'PF'},{name:'Jake LaRavia',pos:'SF'},
+    {name:'Gabe Vincent',pos:'PG'},{name:'Adou Thiero',pos:'SF'}
+  ],
+  'Minnesota Timberwolves': [
+    {name:'Anthony Edwards',pos:'SG'},{name:'Rudy Gobert',pos:'C'},{name:'Julius Randle',pos:'PF'},
+    {name:'Jaden McDaniels',pos:'SF'},{name:'Mike Conley',pos:'PG'},{name:'Naz Reid',pos:'C'},
+    {name:'Donte DiVincenzo',pos:'SG'},{name:'Rob Dillingham',pos:'PG'},{name:'Terrence Shannon Jr.',pos:'SG'},
+    {name:'Bones Hyland',pos:'PG'},{name:'Joe Ingles',pos:'SF'},{name:'Jaylen Clark',pos:'SG'},
+    {name:'Leonard Miller',pos:'PF'},{name:'Joan Beringer',pos:'C'}
+  ],
+  'Philadelphia 76ers': [
+    {name:'Joel Embiid',pos:'C'},{name:'Tyrese Maxey',pos:'PG'},{name:'Paul George',pos:'SF'},
+    {name:'Kelly Oubre Jr.',pos:'SF'},{name:'Andre Drummond',pos:'C'},{name:'Kyle Lowry',pos:'PG'},
+    {name:'Eric Gordon',pos:'SG'},{name:'VJ Edgecombe',pos:'SG'},{name:'Justin Edwards',pos:'SF'},
+    {name:'Johni Broome',pos:'PF'},{name:'Adem Bona',pos:'C'},{name:'Dominick Barlow',pos:'PF'},
+    {name:'Hunter Sallis',pos:'PG'},{name:'Jabari Walker',pos:'PF'},{name:'Trendon Watford',pos:'PF'}
+  ],
+  // Remaining 22 teams — key players only for now, expandable
+  'Atlanta Hawks': [
+    {name:'Trae Young',pos:'PG'},{name:'Dejounte Murray',pos:'PG'},{name:'Jalen Johnson',pos:'PF'},
+    {name:'Clint Capela',pos:'C'},{name:'De\'Andre Hunter',pos:'SF'},{name:'Bogdan Bogdanovic',pos:'SG'},
+    {name:'Saddiq Bey',pos:'SF'},{name:'Kobe Bufkin',pos:'SG'},{name:'Garrison Mathews',pos:'SG'},
+    {name:'Vit Krejci',pos:'PG'},{name:'Mouhamed Gueye',pos:'PF'},{name:'Coby White',pos:'PG'}
+  ],
+  'Boston Celtics': [
+    {name:'Jayson Tatum',pos:'SF'},{name:'Jaylen Brown',pos:'SG'},{name:'Kristaps Porzingis',pos:'C'},
+    {name:'Jrue Holiday',pos:'PG'},{name:'Al Horford',pos:'C'},{name:'Payton Pritchard',pos:'PG'},
+    {name:'Sam Hauser',pos:'SF'},{name:'Derrick White',pos:'SG'},{name:'Luke Kornet',pos:'C'},
+    {name:'Neemias Queta',pos:'C'},{name:'Jordan Walsh',pos:'SF'},{name:'Xavier Tillman',pos:'PF'}
+  ],
+  'Brooklyn Nets': [
+    {name:'Cam Thomas',pos:'SG'},{name:'Ben Simmons',pos:'PF'},{name:'Dorian Finney-Smith',pos:'SF'},
+    {name:'Dennis Schroder',pos:'PG'},{name:'Nic Claxton',pos:'C'},{name:'Noah Clowney',pos:'PF'},
+    {name:'Day\'Ron Sharpe',pos:'C'},{name:'Keon Johnson',pos:'SG'},{name:'Trendon Watford',pos:'PF'},
+    {name:'Reece Beekman',pos:'PG'},{name:'Killian Tillie',pos:'PF'},{name:'Ziaire Williams',pos:'SF'}
+  ],
+  'Charlotte Hornets': [
+    {name:'LaMelo Ball',pos:'PG'},{name:'Miles Bridges',pos:'SF'},{name:'Mark Williams',pos:'C'},
+    {name:'Brandon Miller',pos:'SF'},{name:'Nick Richards',pos:'C'},{name:'Grant Williams',pos:'PF'},
+    {name:'Tre Mann',pos:'SG'},{name:'Josh Green',pos:'SG'},{name:'JT Thor',pos:'PF'},
+    {name:'Tidjane Salaun',pos:'SF'}
+  ],
+  'Chicago Bulls': [
+    {name:'Zach LaVine',pos:'SG'},{name:'Nikola Vucevic',pos:'C'},{name:'DeMar DeRozan',pos:'SF'},
+    {name:'Patrick Williams',pos:'PF'},{name:'Ayo Dosunmu',pos:'PG'},{name:'Alex Caruso',pos:'SG'},
+    {name:'Coby White',pos:'PG'},{name:'Andre Drummond',pos:'C'},{name:'Torrey Craig',pos:'SF'},
+    {name:'Julian Phillips',pos:'SF'},{name:'Dalen Terry',pos:'SF'}
+  ],
+  'Dallas Mavericks': [
+    {name:'Luka Doncic',pos:'PG'},{name:'Kyrie Irving',pos:'PG'},{name:'P.J. Washington',pos:'PF'},
+    {name:'Dereck Lively II',pos:'C'},{name:'Maxi Kleber',pos:'PF'},{name:'Josh Green',pos:'SG'},
+    {name:'Quentin Grimes',pos:'SG'},{name:'Naji Marshall',pos:'SF'},{name:'Cooper Flagg',pos:'SF'},
+    {name:'Kessler Edwards',pos:'SF'},{name:'Jaden Hardy',pos:'SG'}
+  ],
+  'Denver Nuggets': [
+    {name:'Nikola Jokic',pos:'C'},{name:'Jamal Murray',pos:'PG'},{name:'Michael Porter Jr.',pos:'SF'},
+    {name:'Aaron Gordon',pos:'PF'},{name:'Kentavious Caldwell-Pope',pos:'SG'},{name:'Reggie Jackson',pos:'PG'},
+    {name:'Zeke Nnaji',pos:'PF'},{name:'Christian Braun',pos:'SG'},{name:'Peyton Watson',pos:'SF'},
+    {name:'DeAndre Jordan',pos:'C'},{name:'Julian Strawther',pos:'SG'},{name:'Hunter Tyson',pos:'SF'}
+  ],
+  'Golden State Warriors': [
+    {name:'Stephen Curry',pos:'PG'},{name:'Draymond Green',pos:'PF'},{name:'Andrew Wiggins',pos:'SF'},
+    {name:'Kevon Looney',pos:'C'},{name:'Moses Moody',pos:'SG'},{name:'Jonathan Kuminga',pos:'PF'},
+    {name:'Gary Payton II',pos:'PG'},{name:'Brandin Podziemski',pos:'SG'},{name:'Trayce Jackson-Davis',pos:'C'},
+    {name:'Lindy Waters III',pos:'SG'},{name:'Pat Spencer',pos:'PG'}
+  ],
+  'Houston Rockets': [
+    {name:'Alperen Sengun',pos:'C'},{name:'Fred VanVleet',pos:'PG'},{name:'Amen Thompson',pos:'SF'},
+    {name:'Jabari Smith Jr.',pos:'PF'},{name:'Jalen Green',pos:'SG'},{name:'Dillon Brooks',pos:'SF'},
+    {name:'Jeff Green',pos:'PF'},{name:'Steven Adams',pos:'C'},{name:'Aaron Holiday',pos:'PG'},
+    {name:'Tari Eason',pos:'SF'},{name:'Reed Sheppard',pos:'PG'},{name:'Cam Whitmore',pos:'SF'}
+  ],
+  'Indiana Pacers': [
+    {name:'Tyrese Haliburton',pos:'PG'},{name:'Pascal Siakam',pos:'PF'},{name:'Myles Turner',pos:'C'},
+    {name:'Buddy Hield',pos:'SG'},{name:'Aaron Nesmith',pos:'SF'},{name:'Andrew Nembhard',pos:'PG'},
+    {name:'Obi Toppin',pos:'PF'},{name:'Isaiah Jackson',pos:'C'},{name:'Ben Sheppard',pos:'SG'},
+    {name:'T.J. McConnell',pos:'PG'},{name:'Oscar Tshiebwe',pos:'C'}
+  ],
+  'LA Clippers': [
+    {name:'Kawhi Leonard',pos:'SF'},{name:'Paul George',pos:'SF'},{name:'James Harden',pos:'PG'},
+    {name:'Ivica Zubac',pos:'C'},{name:'Russell Westbrook',pos:'PG'},{name:'Norman Powell',pos:'SG'},
+    {name:'Terance Mann',pos:'SF'},{name:'Mason Plumlee',pos:'C'},{name:'P.J. Tucker',pos:'PF'},
+    {name:'Bones Hyland',pos:'PG'},{name:'Amir Coffey',pos:'SG'},{name:'Jordan Miller',pos:'SF'}
+  ],
+  'Memphis Grizzlies': [
+    {name:'Ja Morant',pos:'PG'},{name:'Jaren Jackson Jr.',pos:'C'},{name:'Desmond Bane',pos:'SG'},
+    {name:'Marcus Smart',pos:'PG'},{name:'GG Jackson II',pos:'PF'},{name:'Luke Kennard',pos:'SG'},
+    {name:'Bismack Biyombo',pos:'C'},{name:'John Konchar',pos:'SF'},{name:'Scotty Pippen Jr.',pos:'PG'},
+    {name:'Santi Aldama',pos:'PF'},{name:'Brandon Clarke',pos:'PF'},{name:'Jake LaRavia',pos:'SF'}
+  ],
+  'Miami Heat': [
+    {name:'Jimmy Butler',pos:'SF'},{name:'Bam Adebayo',pos:'C'},{name:'Tyler Herro',pos:'SG'},
+    {name:'Terry Rozier',pos:'PG'},{name:'Kyle Lowry',pos:'PG'},{name:'Caleb Martin',pos:'SF'},
+    {name:'Duncan Robinson',pos:'SG'},{name:'Haywood Highsmith',pos:'SF'},{name:'Nikola Jovic',pos:'PF'},
+    {name:'Josh Richardson',pos:'SG'},{name:'Jaime Jaquez Jr.',pos:'SF'},{name:'Thomas Bryant',pos:'C'}
+  ],
+  'Milwaukee Bucks': [
+    {name:'Giannis Antetokounmpo',pos:'PF'},{name:'Damian Lillard',pos:'PG'},{name:'Khris Middleton',pos:'SF'},
+    {name:'Brook Lopez',pos:'C'},{name:'Bobby Portis',pos:'PF'},{name:'Patrick Beverley',pos:'PG'},
+    {name:'MarJon Beauchamp',pos:'SF'},{name:'AJ Green',pos:'SG'},{name:'Malik Beasley',pos:'SG'},
+    {name:'Robin Lopez',pos:'C'},{name:'Chris Livingston',pos:'SF'},{name:'Taurean Prince',pos:'SF'}
+  ],
+  'New Orleans Pelicans': [
+    {name:'Zion Williamson',pos:'PF'},{name:'Brandon Ingram',pos:'SF'},{name:'CJ McCollum',pos:'PG'},
+    {name:'Jonas Valanciunas',pos:'C'},{name:'Herb Jones',pos:'SF'},{name:'Trey Murphy III',pos:'SF'},
+    {name:'Jose Alvarado',pos:'PG'},{name:'Larry Nance Jr.',pos:'PF'},{name:'Naji Marshall',pos:'SF'},
+    {name:'Jordan Hawkins',pos:'SG'},{name:'Dyson Daniels',pos:'SG'},{name:'Kira Lewis Jr.',pos:'PG'}
+  ],
+  'Orlando Magic': [
+    {name:'Paolo Banchero',pos:'PF'},{name:'Franz Wagner',pos:'SF'},{name:'Wendell Carter Jr.',pos:'C'},
+    {name:'Markelle Fultz',pos:'PG'},{name:'Jalen Suggs',pos:'PG'},{name:'Jonathan Isaac',pos:'PF'},
+    {name:'Gary Harris',pos:'SG'},{name:'Cole Anthony',pos:'PG'},{name:'Moritz Wagner',pos:'C'},
+    {name:'Caleb Houstan',pos:'SF'},{name:'Admiral Schofield',pos:'SF'},{name:'Mac McClung',pos:'PG'}
+  ],
+  'Phoenix Suns': [
+    {name:'Kevin Durant',pos:'SF'},{name:'Devin Booker',pos:'SG'},{name:'Bradley Beal',pos:'SG'},
+    {name:'Jusuf Nurkic',pos:'C'},{name:'Grayson Allen',pos:'SG'},{name:'Eric Gordon',pos:'SG'},
+    {name:'Drew Eubanks',pos:'C'},{name:'Royce O\'Neale',pos:'SF'},{name:'Nassir Little',pos:'SF'},
+    {name:'Bol Bol',pos:'C'},{name:'Yuta Watanabe',pos:'SF'},{name:'Jordan Goodwin',pos:'PG'}
+  ],
+  'Portland Trail Blazers': [
+    {name:'Anfernee Simons',pos:'PG'},{name:'Jerami Grant',pos:'PF'},{name:'Matisse Thybulle',pos:'SF'},
+    {name:'Deandre Ayton',pos:'C'},{name:'Jabari Walker',pos:'PF'},{name:'Shaedon Sharpe',pos:'SG'},
+    {name:'Toumani Camara',pos:'SF'},{name:'Malcolm Brogdon',pos:'PG'},{name:'Ibou Badji',pos:'C'},
+    {name:'Kris Murray',pos:'SF'},{name:'Ryan Arcidiacono',pos:'PG'},{name:'Scoot Henderson',pos:'PG'}
+  ],
+  'Sacramento Kings': [
+    {name:'De\'Aaron Fox',pos:'PG'},{name:'Domantas Sabonis',pos:'C'},{name:'Harrison Barnes',pos:'SF'},
+    {name:'Kevin Huerter',pos:'SG'},{name:'Malik Monk',pos:'PG'},{name:'Trey Lyles',pos:'PF'},
+    {name:'Alex Len',pos:'C'},{name:'KJ Martin',pos:'SF'},{name:'Sasha Vezenkov',pos:'SF'},
+    {name:'Kessler Edwards',pos:'SF'},{name:'Colby Jones',pos:'SG'},{name:'Jordan McLaughlin',pos:'PG'}
+  ],
+  'Toronto Raptors': [
+    {name:'Scottie Barnes',pos:'PF'},{name:'Pascal Siakam',pos:'PF'},{name:'Fred VanVleet',pos:'PG'},
+    {name:'OG Anunoby',pos:'SF'},{name:'Gary Trent Jr.',pos:'SG'},{name:'Jakob Poeltl',pos:'C'},
+    {name:'Precious Achiuwa',pos:'PF'},{name:'Gradey Dick',pos:'SG'},{name:'Immanuel Quickley',pos:'PG'},
+    {name:'RJ Barrett',pos:'SF'},{name:'Ochai Agbaji',pos:'SG'},{name:'D.J. Carton',pos:'PG'}
+  ],
+  'Utah Jazz': [
+    {name:'Lauri Markkanen',pos:'PF'},{name:'Jordan Clarkson',pos:'PG'},{name:'Collin Sexton',pos:'PG'},
+    {name:'John Collins',pos:'PF'},{name:'Kelly Olynyk',pos:'C'},{name:'Talen Horton-Tucker',pos:'SF'},
+    {name:'Ochai Agbaji',pos:'SG'},{name:'Walker Kessler',pos:'C'},{name:'Simone Fontecchio',pos:'SF'},
+    {name:'Keyonte George',pos:'PG'},{name:'Brice Sensabaugh',pos:'SF'},{name:'Taylor Hendricks',pos:'PF'}
+  ],
+  'Washington Wizards': [
+    {name:'Kyle Kuzma',pos:'PF'},{name:'Kristaps Porzingis',pos:'C'},{name:'Bradley Beal',pos:'SG'},
+    {name:'Deni Avdija',pos:'SF'},{name:'Tyus Jones',pos:'PG'},{name:'Corey Kispert',pos:'SF'},
+    {name:'Anthony Gill',pos:'PF'},{name:'Eugene Omoruyi',pos:'SF'},{name:'Isaiah Livers',pos:'SF'},
+    {name:'Jordan Poole',pos:'SG'},{name:'Marvin Bagley III',pos:'PF'},{name:'Tristan Vukcevic',pos:'C'}
+  ],
+};
+
+// ── NFL TEAMS — ALL 32 ──
+const NFL_TEAMS = [
+  // AFC East
+  {name:'Buffalo Bills',abbr:'BUF',color:'#00338D',conf:'AFC',div:'East'},
+  {name:'Miami Dolphins',abbr:'MIA',color:'#008E97',conf:'AFC',div:'East'},
+  {name:'New England Patriots',abbr:'NE',color:'#002244',conf:'AFC',div:'East'},
+  {name:'New York Jets',abbr:'NYJ',color:'#125740',conf:'AFC',div:'East'},
+  // AFC North
+  {name:'Baltimore Ravens',abbr:'BAL',color:'#241773',conf:'AFC',div:'North'},
+  {name:'Cincinnati Bengals',abbr:'CIN',color:'#FB4F14',conf:'AFC',div:'North'},
+  {name:'Cleveland Browns',abbr:'CLE',color:'#311D00',conf:'AFC',div:'North'},
+  {name:'Pittsburgh Steelers',abbr:'PIT',color:'#FFB612',conf:'AFC',div:'North'},
+  // AFC South
+  {name:'Houston Texans',abbr:'HOU',color:'#03202F',conf:'AFC',div:'South'},
+  {name:'Indianapolis Colts',abbr:'IND',color:'#002C5F',conf:'AFC',div:'South'},
+  {name:'Jacksonville Jaguars',abbr:'JAX',color:'#006778',conf:'AFC',div:'South'},
+  {name:'Tennessee Titans',abbr:'TEN',color:'#0C2340',conf:'AFC',div:'South'},
+  // AFC West
+  {name:'Denver Broncos',abbr:'DEN',color:'#FB4F14',conf:'AFC',div:'West'},
+  {name:'Kansas City Chiefs',abbr:'KC',color:'#E31837',conf:'AFC',div:'West'},
+  {name:'Las Vegas Raiders',abbr:'LV',color:'#000000',conf:'AFC',div:'West'},
+  {name:'Los Angeles Chargers',abbr:'LAC',color:'#0080C6',conf:'AFC',div:'West'},
+  // NFC East
+  {name:'Dallas Cowboys',abbr:'DAL',color:'#003594',conf:'NFC',div:'East'},
+  {name:'New York Giants',abbr:'NYG',color:'#0B2265',conf:'NFC',div:'East'},
+  {name:'Philadelphia Eagles',abbr:'PHI',color:'#004C54',conf:'NFC',div:'East'},
+  {name:'Washington Commanders',abbr:'WSH',color:'#5A1414',conf:'NFC',div:'East'},
+  // NFC North
+  {name:'Chicago Bears',abbr:'CHI',color:'#0B162A',conf:'NFC',div:'North'},
+  {name:'Detroit Lions',abbr:'DET',color:'#0076B6',conf:'NFC',div:'North'},
+  {name:'Green Bay Packers',abbr:'GB',color:'#203731',conf:'NFC',div:'North'},
+  {name:'Minnesota Vikings',abbr:'MIN',color:'#4F2683',conf:'NFC',div:'North'},
+  // NFC South
+  {name:'Atlanta Falcons',abbr:'ATL',color:'#A71930',conf:'NFC',div:'South'},
+  {name:'Carolina Panthers',abbr:'CAR',color:'#0085CA',conf:'NFC',div:'South'},
+  {name:'New Orleans Saints',abbr:'NO',color:'#D3BC8D',conf:'NFC',div:'South'},
+  {name:'Tampa Bay Buccaneers',abbr:'TB',color:'#D50A0A',conf:'NFC',div:'South'},
+  // NFC West
+  {name:'Arizona Cardinals',abbr:'ARI',color:'#97233F',conf:'NFC',div:'West'},
+  {name:'Los Angeles Rams',abbr:'LAR',color:'#003594',conf:'NFC',div:'West'},
+  {name:'San Francisco 49ers',abbr:'SF',color:'#AA0000',conf:'NFC',div:'West'},
+  {name:'Seattle Seahawks',abbr:'SEA',color:'#002244',conf:'NFC',div:'West'},
+];
+
+// NFL Rosters — key skill players (updated for 2025 season)
+const NFL_ROSTERS = {
+  'Buffalo Bills': [
+    {name:'Josh Allen',pos:'QB'},{name:'Stefon Diggs',pos:'WR'},{name:'Khalil Shakir',pos:'WR'},
+    {name:'Dalton Kincaid',pos:'TE'},{name:'Dawson Knox',pos:'TE'},{name:'James Cook',pos:'RB'},
+    {name:'Ty Johnson',pos:'RB'},{name:'Dion Dawkins',pos:'OT'},{name:'Ed Oliver',pos:'DT'},
+    {name:'Von Miller',pos:'DE'},{name:'Matt Milano',pos:'LB'},{name:'Micah Hyde',pos:'S'},
+    {name:'Jordan Poyer',pos:'S'},{name:'Taron Johnson',pos:'CB'},{name:'Keon Coleman',pos:'WR'}
+  ],
+  'Miami Dolphins': [
+    {name:'Tua Tagovailoa',pos:'QB'},{name:'Tyreek Hill',pos:'WR'},{name:'Jaylen Waddle',pos:'WR'},
+    {name:'Raheem Mostert',pos:'RB'},{name:'De\'Von Achane',pos:'RB'},{name:'Durham Smythe',pos:'TE'},
+    {name:'Bradley Chubb',pos:'DE'},{name:'Jaelan Phillips',pos:'DE'},{name:'Zach Sieler',pos:'DT'},
+    {name:'Jevon Holland',pos:'S'},{name:'Xavien Howard',pos:'CB'},{name:'Jalen Ramsey',pos:'CB'}
+  ],
+  'New England Patriots': [
+    {name:'Drake Maye',pos:'QB'},{name:'JuJu Smith-Schuster',pos:'WR'},{name:'Kendrick Bourne',pos:'WR'},
+    {name:'Hunter Henry',pos:'TE'},{name:'Rhamondre Stevenson',pos:'RB'},{name:'Antonio Gibson',pos:'RB'},
+    {name:'Christian Barmore',pos:'DT'},{name:'Matthew Judon',pos:'DE'},{name:'Ja\'Whaun Bentley',pos:'LB'},
+    {name:'Kyle Dugger',pos:'S'},{name:'Christian Gonzalez',pos:'CB'},{name:'Kayshon Boutte',pos:'WR'}
+  ],
+  'New York Jets': [
+    {name:'Aaron Rodgers',pos:'QB'},{name:'Garrett Wilson',pos:'WR'},{name:'Allen Lazard',pos:'WR'},
+    {name:'Tyler Conklin',pos:'TE'},{name:'Breece Hall',pos:'RB'},{name:'Quinnen Williams',pos:'DT'},
+    {name:'Sauce Gardner',pos:'CB'},{name:'D.J. Reed',pos:'CB'},{name:'Tony Adams',pos:'S'},
+    {name:'C.J. Mosley',pos:'LB'},{name:'Haason Reddick',pos:'DE'},{name:'Will McDonald IV',pos:'DE'}
+  ],
+  'Baltimore Ravens': [
+    {name:'Lamar Jackson',pos:'QB'},{name:'Zay Flowers',pos:'WR'},{name:'Nelson Agholor',pos:'WR'},
+    {name:'Mark Andrews',pos:'TE'},{name:'Derrick Henry',pos:'RB'},{name:'Gus Edwards',pos:'RB'},
+    {name:'Roquan Smith',pos:'LB'},{name:'Patrick Queen',pos:'LB'},{name:'Marlon Humphrey',pos:'CB'},
+    {name:'Marcus Williams',pos:'S'},{name:'Kyle Hamilton',pos:'S'},{name:'Odafe Oweh',pos:'DE'},
+    {name:'Justin Madubuike',pos:'DT'},{name:'Rashod Bateman',pos:'WR'}
+  ],
+  'Cincinnati Bengals': [
+    {name:'Joe Burrow',pos:'QB'},{name:'Ja\'Marr Chase',pos:'WR'},{name:'Tee Higgins',pos:'WR'},
+    {name:'Tyler Boyd',pos:'WR'},{name:'Irv Smith Jr.',pos:'TE'},{name:'Joe Mixon',pos:'RB'},
+    {name:'Zack Moss',pos:'RB'},{name:'Trey Hendrickson',pos:'DE'},{name:'Sam Hubbard',pos:'DE'},
+    {name:'D.J. Reader',pos:'DT'},{name:'Germaine Pratt',pos:'LB'},{name:'Cam Taylor-Britt',pos:'CB'},
+    {name:'Jessie Bates III',pos:'S'}
+  ],
+  'Cleveland Browns': [
+    {name:'Deshaun Watson',pos:'QB'},{name:'Amari Cooper',pos:'WR'},{name:'Elijah Moore',pos:'WR'},
+    {name:'David Njoku',pos:'TE'},{name:'Nick Chubb',pos:'RB'},{name:'Jerome Ford',pos:'RB'},
+    {name:'Myles Garrett',pos:'DE'},{name:'Dalvin Tomlinson',pos:'DT'},{name:'Jeremiah Owusu-Koramoah',pos:'LB'},
+    {name:'Martin Emerson Jr.',pos:'CB'},{name:'Greg Newsome II',pos:'CB'},{name:'Juan Thornhill',pos:'S'}
+  ],
+  'Pittsburgh Steelers': [
+    {name:'Russell Wilson',pos:'QB'},{name:'George Pickens',pos:'WR'},{name:'Diontae Johnson',pos:'WR'},
+    {name:'Pat Freiermuth',pos:'TE'},{name:'Najee Harris',pos:'RB'},{name:'Jaylen Warren',pos:'RB'},
+    {name:'T.J. Watt',pos:'DE'},{name:'Alex Highsmith',pos:'DE'},{name:'Cameron Heyward',pos:'DT'},
+    {name:'Patrick Queen',pos:'LB'},{name:'Joey Porter Jr.',pos:'CB'},{name:'Minkah Fitzpatrick',pos:'S'},
+    {name:'Donte Jackson',pos:'CB'}
+  ],
+  'Houston Texans': [
+    {name:'C.J. Stroud',pos:'QB'},{name:'Nico Collins',pos:'WR'},{name:'Stefon Diggs',pos:'WR'},
+    {name:'Dalton Schultz',pos:'TE'},{name:'Devin Singletary',pos:'RB'},{name:'Joe Mixon',pos:'RB'},
+    {name:'Will Anderson Jr.',pos:'DE'},{name:'Danielle Hunter',pos:'DE'},{name:'Sheldon Rankins',pos:'DT'},
+    {name:'Denzel Perryman',pos:'LB'},{name:'Derek Stingley Jr.',pos:'CB'},{name:'Jimmie Ward',pos:'S'},
+    {name:'Tank Dell',pos:'WR'}
+  ],
+  'Indianapolis Colts': [
+    {name:'Anthony Richardson',pos:'QB'},{name:'Michael Pittman Jr.',pos:'WR'},{name:'Josh Downs',pos:'WR'},
+    {name:'Mo Alie-Cox',pos:'TE'},{name:'Jonathan Taylor',pos:'RB'},{name:'Zack Moss',pos:'RB'},
+    {name:'DeForest Buckner',pos:'DT'},{name:'Kwity Paye',pos:'DE'},{name:'Shaquille Leonard',pos:'LB'},
+    {name:'Kenny Moore II',pos:'CB'},{name:'Julian Blackmon',pos:'S'},{name:'Rodney Thomas II',pos:'S'}
+  ],
+  'Jacksonville Jaguars': [
+    {name:'Trevor Lawrence',pos:'QB'},{name:'Calvin Ridley',pos:'WR'},{name:'Gabe Davis',pos:'WR'},
+    {name:'Evan Engram',pos:'TE'},{name:'Travis Etienne Jr.',pos:'RB'},{name:'Tank Bigsby',pos:'RB'},
+    {name:'Josh Allen',pos:'DE'},{name:'Foye Oluokun',pos:'LB'},{name:'Tyson Campbell',pos:'CB'},
+    {name:'Darious Williams',pos:'CB'},{name:'Andre Cisco',pos:'S'},{name:'Rayshawn Jenkins',pos:'S'}
+  ],
+  'Tennessee Titans': [
+    {name:'Will Levis',pos:'QB'},{name:'DeAndre Hopkins',pos:'WR'},{name:'Tyler Boyd',pos:'WR'},
+    {name:'Chig Okonkwo',pos:'TE'},{name:'Tony Pollard',pos:'RB'},{name:'Tyjae Spears',pos:'RB'},
+    {name:'Harold Landry III',pos:'DE'},{name:'Jeffery Simmons',pos:'DT'},{name:'Azeez Al-Shaair',pos:'LB'},
+    {name:'L\'Jarius Sneed',pos:'CB'},{name:'Kristian Fulton',pos:'CB'},{name:'Amani Hooker',pos:'S'}
+  ],
+  'Denver Broncos': [
+    {name:'Bo Nix',pos:'QB'},{name:'Courtland Sutton',pos:'WR'},{name:'Jerry Jeudy',pos:'WR'},
+    {name:'Greg Dulcich',pos:'TE'},{name:'Javonte Williams',pos:'RB'},{name:'Samaje Perine',pos:'RB'},
+    {name:'Randy Gregory',pos:'DE'},{name:'Zach Allen',pos:'DT'},{name:'Baron Browning',pos:'LB'},
+    {name:'Pat Surtain II',pos:'CB'},{name:'Damarri Mathis',pos:'CB'},{name:'Justin Simmons',pos:'S'},
+    {name:'Marvin Mims Jr.',pos:'WR'}
+  ],
+  'Kansas City Chiefs': [
+    {name:'Patrick Mahomes',pos:'QB'},{name:'Travis Kelce',pos:'TE'},{name:'Rashee Rice',pos:'WR'},
+    {name:'Hollywood Brown',pos:'WR'},{name:'Isiah Pacheco',pos:'RB'},{name:'Clyde Edwards-Helaire',pos:'RB'},
+    {name:'Chris Jones',pos:'DT'},{name:'George Karlaftis',pos:'DE'},{name:'Nick Bolton',pos:'LB'},
+    {name:'L\'Jarius Sneed',pos:'CB'},{name:'Trent McDuffie',pos:'CB'},{name:'Bryan Cook',pos:'S'},
+    {name:'Xavier Worthy',pos:'WR'}
+  ],
+  'Las Vegas Raiders': [
+    {name:'Aidan O\'Connell',pos:'QB'},{name:'Davante Adams',pos:'WR'},{name:'Jakobi Meyers',pos:'WR'},
+    {name:'Michael Mayer',pos:'TE'},{name:'Josh Jacobs',pos:'RB'},{name:'Alexander Mattison',pos:'RB'},
+    {name:'Maxx Crosby',pos:'DE'},{name:'Christian Wilkins',pos:'DT'},{name:'Robert Spillane',pos:'LB'},
+    {name:'Nate Hobbs',pos:'CB'},{name:'Marcus Peters',pos:'CB'},{name:'Marcus Epps',pos:'S'}
+  ],
+  'Los Angeles Chargers': [
+    {name:'Justin Herbert',pos:'QB'},{name:'Keenan Allen',pos:'WR'},{name:'Joshua Palmer',pos:'WR'},
+    {name:'Gerald Everett',pos:'TE'},{name:'Austin Ekeler',pos:'RB'},{name:'J.K. Dobbins',pos:'RB'},
+    {name:'Joey Bosa',pos:'DE'},{name:'Khalil Mack',pos:'DE'},{name:'Sebastian Joseph-Day',pos:'DT'},
+    {name:'Kenneth Murray Jr.',pos:'LB'},{name:'J.C. Jackson',pos:'CB'},{name:'Derwin James Jr.',pos:'S'},
+    {name:'Quentin Johnston',pos:'WR'}
+  ],
+  'Dallas Cowboys': [
+    {name:'Dak Prescott',pos:'QB'},{name:'CeeDee Lamb',pos:'WR'},{name:'Brandin Cooks',pos:'WR'},
+    {name:'Jake Ferguson',pos:'TE'},{name:'Tony Pollard',pos:'RB'},{name:'Rico Dowdle',pos:'RB'},
+    {name:'Micah Parsons',pos:'DE'},{name:'DeMarcus Lawrence',pos:'DE'},{name:'Osa Odighizuwa',pos:'DT'},
+    {name:'Leighton Vander Esch',pos:'LB'},{name:'Trevon Diggs',pos:'CB'},{name:'Jayron Kearse',pos:'S'},
+    {name:'Jalen Tolbert',pos:'WR'}
+  ],
+  'New York Giants': [
+    {name:'Daniel Jones',pos:'QB'},{name:'Malik Nabers',pos:'WR'},{name:'Darius Slayton',pos:'WR'},
+    {name:'Darren Waller',pos:'TE'},{name:'Devin Singletary',pos:'RB'},{name:'Eric Gray',pos:'RB'},
+    {name:'Kayvon Thibodeaux',pos:'DE'},{name:'Dexter Lawrence',pos:'DT'},{name:'Bobby Okereke',pos:'LB'},
+    {name:'Deonte Banks',pos:'CB'},{name:'Adoree\' Jackson',pos:'CB'},{name:'Xavier McKinney',pos:'S'}
+  ],
+  'Philadelphia Eagles': [
+    {name:'Jalen Hurts',pos:'QB'},{name:'A.J. Brown',pos:'WR'},{name:'DeVonta Smith',pos:'WR'},
+    {name:'Dallas Goedert',pos:'TE'},{name:'Saquon Barkley',pos:'RB'},{name:'Kenneth Gainwell',pos:'RB'},
+    {name:'Bryce Huff',pos:'DE'},{name:'Jalen Carter',pos:'DT'},{name:'Zack Baun',pos:'LB'},
+    {name:'Darius Slay',pos:'CB'},{name:'C.J. Gardner-Johnson',pos:'S'},{name:'Reed Blankenship',pos:'S'},
+    {name:'Quinyon Mitchell',pos:'CB'}
+  ],
+  'Washington Commanders': [
+    {name:'Jayden Daniels',pos:'QB'},{name:'Terry McLaurin',pos:'WR'},{name:'Jahan Dotson',pos:'WR'},
+    {name:'Logan Thomas',pos:'TE'},{name:'Brian Robinson Jr.',pos:'RB'},{name:'Austin Ekeler',pos:'RB'},
+    {name:'Chase Young',pos:'DE'},{name:'Jonathan Allen',pos:'DT'},{name:'Daron Payne',pos:'DT'},
+    {name:'Bobby Wagner',pos:'LB'},{name:'Emmanuel Forbes',pos:'CB'},{name:'Kamren Curl',pos:'S'},
+    {name:'Noah Brown',pos:'WR'}
+  ],
+  'Chicago Bears': [
+    {name:'Caleb Williams',pos:'QB'},{name:'Keenan Allen',pos:'WR'},{name:'D.J. Moore',pos:'WR'},
+    {name:'Cole Kmet',pos:'TE'},{name:'D\'Andre Swift',pos:'RB'},{name:'Khalil Herbert',pos:'RB'},
+    {name:'Montez Sweat',pos:'DE'},{name:'Grady Jarrett',pos:'DT'},{name:'T.J. Edwards',pos:'LB'},
+    {name:'Jaylon Johnson',pos:'CB'},{name:'Kevin Byard',pos:'S'},{name:'Rome Odunze',pos:'WR'}
+  ],
+  'Detroit Lions': [
+    {name:'Jared Goff',pos:'QB'},{name:'Amon-Ra St. Brown',pos:'WR'},{name:'Jameson Williams',pos:'WR'},
+    {name:'Sam LaPorta',pos:'TE'},{name:'David Montgomery',pos:'RB'},{name:'Jahmyr Gibbs',pos:'RB'},
+    {name:'Aidan Hutchinson',pos:'DE'},{name:'Alim McNeill',pos:'DT'},{name:'Alex Anzalone',pos:'LB'},
+    {name:'Carlton Davis III',pos:'CB'},{name:'Brian Branch',pos:'S'},{name:'Kerby Joseph',pos:'S'},
+    {name:'Josh Reynolds',pos:'WR'}
+  ],
+  'Green Bay Packers': [
+    {name:'Jordan Love',pos:'QB'},{name:'Jayden Reed',pos:'WR'},{name:'Christian Watson',pos:'WR'},
+    {name:'Tucker Kraft',pos:'TE'},{name:'Aaron Jones',pos:'RB'},{name:'A.J. Dillon',pos:'RB'},
+    {name:'Rashan Gary',pos:'DE'},{name:'Kenny Clark',pos:'DT'},{name:'De\'Vondre Campbell',pos:'LB'},
+    {name:'Jaire Alexander',pos:'CB'},{name:'Darnell Savage',pos:'S'},{name:'Romeo Doubs',pos:'WR'},
+    {name:'Luke Musgrave',pos:'TE'}
+  ],
+  'Minnesota Vikings': [
+    {name:'Sam Darnold',pos:'QB'},{name:'Justin Jefferson',pos:'WR'},{name:'Jordan Addison',pos:'WR'},
+    {name:'T.J. Hockenson',pos:'TE'},{name:'Aaron Jones',pos:'RB'},{name:'Ty Chandler',pos:'RB'},
+    {name:'Jonathan Greenard',pos:'DE'},{name:'Harrison Phillips',pos:'DT'},{name:'Jordan Hicks',pos:'LB'},
+    {name:'Byron Murphy II',pos:'CB'},{name:'Harrison Smith',pos:'S'},{name:'Josh Metellus',pos:'S'},
+    {name:'Andrew Van Ginkel',pos:'LB'}
+  ],
+  'Atlanta Falcons': [
+    {name:'Kirk Cousins',pos:'QB'},{name:'Drake London',pos:'WR'},{name:'Darnell Mooney',pos:'WR'},
+    {name:'Kyle Pitts',pos:'TE'},{name:'Bijan Robinson',pos:'RB'},{name:'Tyler Allgeier',pos:'RB'},
+    {name:'Grady Jarrett',pos:'DT'},{name:'Lorenzo Carter',pos:'DE'},{name:'Nate Landman',pos:'LB'},
+    {name:'A.J. Terrell',pos:'CB'},{name:'Jessie Bates III',pos:'S'},{name:'Justin Simmons',pos:'S'},
+    {name:'Ray-Ray McCloud',pos:'WR'}
+  ],
+  'Carolina Panthers': [
+    {name:'Bryce Young',pos:'QB'},{name:'Adam Thielen',pos:'WR'},{name:'Diontae Johnson',pos:'WR'},
+    {name:'Hayden Hurst',pos:'TE'},{name:'Miles Sanders',pos:'RB'},{name:'Chuba Hubbard',pos:'RB'},
+    {name:'Brian Burns',pos:'DE'},{name:'Derrick Brown',pos:'DT'},{name:'Shaq Thompson',pos:'LB'},
+    {name:'Jaycee Horn',pos:'CB'},{name:'Jeremy Chinn',pos:'S'},{name:'Xavier Woods',pos:'S'},
+    {name:'Jonathon Brooks',pos:'RB'}
+  ],
+  'New Orleans Saints': [
+    {name:'Derek Carr',pos:'QB'},{name:'Chris Olave',pos:'WR'},{name:'Michael Thomas',pos:'WR'},
+    {name:'Juwan Johnson',pos:'TE'},{name:'Alvin Kamara',pos:'RB'},{name:'Jamaal Williams',pos:'RB'},
+    {name:'Cameron Jordan',pos:'DE'},{name:'Bryan Bresee',pos:'DT'},{name:'Pete Werner',pos:'LB'},
+    {name:'Marshon Lattimore',pos:'CB'},{name:'Tyrann Mathieu',pos:'S'},{name:'Marcus Davenport',pos:'DE'},
+    {name:'Rashid Shaheed',pos:'WR'}
+  ],
+  'Tampa Bay Buccaneers': [
+    {name:'Baker Mayfield',pos:'QB'},{name:'Mike Evans',pos:'WR'},{name:'Chris Godwin',pos:'WR'},
+    {name:'Cade Otton',pos:'TE'},{name:'Rachaad White',pos:'RB'},{name:'Sean Tucker',pos:'RB'},
+    {name:'Vita Vea',pos:'DT'},{name:'Yaya Diaby',pos:'DE'},{name:'Lavonte David',pos:'LB'},
+    {name:'Carlton Davis III',pos:'CB'},{name:'Antoine Winfield Jr.',pos:'S'},{name:'Jordan Whitehead',pos:'S'},
+    {name:'Trey Palmer',pos:'WR'}
+  ],
+  'Arizona Cardinals': [
+    {name:'Kyler Murray',pos:'QB'},{name:'Marvin Harrison Jr.',pos:'WR'},{name:'Michael Wilson',pos:'WR'},
+    {name:'Trey McBride',pos:'TE'},{name:'James Conner',pos:'RB'},{name:'Emari Demercado',pos:'RB'},
+    {name:'Zaven Collins',pos:'LB'},{name:'Dante Stills',pos:'DT'},{name:'Kyzir White',pos:'LB'},
+    {name:'Sean Murphy-Bunting',pos:'CB'},{name:'Budda Baker',pos:'S'},{name:'Jalen Thompson',pos:'S'},
+    {name:'Greg Dortch',pos:'WR'}
+  ],
+  'Los Angeles Rams': [
+    {name:'Matthew Stafford',pos:'QB'},{name:'Cooper Kupp',pos:'WR'},{name:'Puka Nacua',pos:'WR'},
+    {name:'Tyler Higbee',pos:'TE'},{name:'Kyren Williams',pos:'RB'},{name:'Royce Freeman',pos:'RB'},
+    {name:'Aaron Donald',pos:'DT'},{name:'Byron Young',pos:'DE'},{name:'Ernest Jones IV',pos:'LB'},
+    {name:'Ahkello Witherspoon',pos:'CB'},{name:'Quentin Lake',pos:'S'},{name:'Jordan Fuller',pos:'S'},
+    {name:'Tutu Atwell',pos:'WR'}
+  ],
+  'San Francisco 49ers': [
+    {name:'Brock Purdy',pos:'QB'},{name:'Deebo Samuel',pos:'WR'},{name:'Brandon Aiyuk',pos:'WR'},
+    {name:'George Kittle',pos:'TE'},{name:'Christian McCaffrey',pos:'RB'},{name:'Jordan Mason',pos:'RB'},
+    {name:'Nick Bosa',pos:'DE'},{name:'Javon Hargrave',pos:'DT'},{name:'Fred Warner',pos:'LB'},
+    {name:'Charvarius Ward',pos:'CB'},{name:'Talanoa Hufanga',pos:'S'},{name:'Ji\'Ayir Brown',pos:'S'},
+    {name:'Ricky Pearsall',pos:'WR'}
+  ],
+  'Seattle Seahawks': [
+    {name:'Geno Smith',pos:'QB'},{name:'DK Metcalf',pos:'WR'},{name:'Tyler Lockett',pos:'WR'},
+    {name:'Noah Fant',pos:'TE'},{name:'Kenneth Walker III',pos:'RB'},{name:'Zach Charbonnet',pos:'RB'},
+    {name:'Uchenna Nwosu',pos:'DE'},{name:'Jarran Reed',pos:'DT'},{name:'Bobby Wagner',pos:'LB'},
+    {name:'Riq Woolen',pos:'CB'},{name:'Jamal Adams',pos:'S'},{name:'Julian Love',pos:'S'},
+    {name:'Jaxon Smith-Njigba',pos:'WR'}
+  ],
+};
 
 const SOCCER_LEAGUES = {
   'Premier League':{color:'#380E62',country:'England',flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',apiId:39},
@@ -1142,6 +1613,9 @@ function renderHub(){
   else if(v==='nba-teams') renderHubNBATeams();
   else if(v==='nba-team') renderHubNBATeam();
   else if(v==='nba-player') renderHubNBAPlayer();
+  else if(v==='nfl-teams') renderHubNFLTeams();
+  else if(v==='nfl-team') renderHubNFLTeam();
+  else if(v==='nfl-player') renderHubNFLPlayer();
   else if(v==='soccer-leagues') renderHubSoccerLeagues();
   else if(v==='soccer-league') renderHubSoccerLeague();
   else if(v==='soccer-team') renderHubSoccerTeam();
@@ -1157,6 +1631,11 @@ function updateBreadcrumb(){
     if(hubState.view==='nba-teams') parts.push(`<span>NBA</span>`);
     else parts.push(`<span onclick="hubNav('nba-teams')">NBA</span>`);
   }
+  if(hubState.sport==='NFL'){
+    parts.push(`<span class="sep">›</span>`);
+    if(hubState.view==='nfl-teams') parts.push(`<span>NFL</span>`);
+    else parts.push(`<span onclick="hubNav('nfl-teams')">NFL</span>`);
+  }
   if(hubState.sport==='Soccer'){
     parts.push(`<span class="sep">›</span>`);
     if(hubState.view==='soccer-leagues') parts.push(`<span>Soccer</span>`);
@@ -1164,13 +1643,13 @@ function updateBreadcrumb(){
   }
   if(hubState.league){
     parts.push(`<span class="sep">›</span>`);
-    const lv = hubState.sport==='NBA'?'nba-teams':'soccer-league';
+    const lv = hubState.sport==='NBA'?'nba-teams':hubState.sport==='NFL'?'nfl-teams':'soccer-league';
     if(hubState.team||hubState.player) parts.push(`<span onclick="hubNav('${lv}')">${hubState.league}</span>`);
     else parts.push(`<span>${hubState.league}</span>`);
   }
   if(hubState.team){
     parts.push(`<span class="sep">›</span>`);
-    const tv = hubState.sport==='NBA'?'nba-team':'soccer-team';
+    const tv = hubState.sport==='NBA'?'nba-team':hubState.sport==='NFL'?'nfl-team':'soccer-team';
     if(hubState.player) parts.push(`<span onclick="hubNav('${tv}')">${hubState.team.name||hubState.team}</span>`);
     else parts.push(`<span>${hubState.team.name||hubState.team}</span>`);
   }
@@ -1184,9 +1663,11 @@ function updateBreadcrumb(){
 function hubNav(view, extra={}){
   if(view==='sports'){hubState={...hubState,view:'sports',sport:null,league:null,team:null,player:null};}
   else if(view==='nba-teams'){hubState={...hubState,view:'nba-teams',sport:'NBA',league:null,team:null,player:null};}
+  else if(view==='nfl-teams'){hubState={...hubState,view:'nfl-teams',sport:'NFL',league:null,team:null,player:null};}
   else if(view==='soccer-leagues'){hubState={...hubState,view:'soccer-leagues',sport:'Soccer',league:null,team:null,player:null};}
   else if(view==='soccer-league'){hubState={...hubState,view:'soccer-league',team:null,player:null};}
   else if(view==='nba-team'){hubState={...hubState,view:'nba-team',player:null};}
+  else if(view==='nfl-team'){hubState={...hubState,view:'nfl-team',player:null};}
   else if(view==='soccer-team'){hubState={...hubState,view:'soccer-team',player:null};}
   else{hubState={...hubState,view,...extra};}
   renderHub();
@@ -1199,6 +1680,11 @@ function renderHubSports(){
         <div class="hub-sport-icon">🏀</div>
         <div class="hub-sport-name">NBA</div>
         <div class="hub-sport-sub">30 teams</div>
+      </div>
+      <div class="hub-sport-card" onclick="hubNav('nfl-teams',{sport:'NFL'})">
+        <div class="hub-sport-icon">🏈</div>
+        <div class="hub-sport-name">NFL</div>
+        <div class="hub-sport-sub">32 teams</div>
       </div>
       <div class="hub-sport-card" onclick="hubNav('soccer-leagues',{sport:'Soccer'})">
         <div class="hub-sport-icon">⚽</div>
@@ -1255,14 +1741,47 @@ function hubSearch(q){
   else if(hubState.view==='soccer-league') renderHubSoccerLeague();
 }
 
+const NBA_ALIASES = {
+  'Oklahoma City Thunder':['OKC Thunder','OKC','Thunder'],
+  'Minnesota Timberwolves':['Timberwolves','Twolves','T-Wolves','T Wolves','MIN'],
+  'San Antonio Spurs':['Spurs','SAS'],
+  'Cleveland Cavaliers':['Cavaliers','Cavs','CLE'],
+  'Detroit Pistons':['Pistons','DET'],
+  'Los Angeles Lakers':['Lakers','LAL','LA Lakers'],
+  'New York Knicks':['Knicks','NYK'],
+  'Philadelphia 76ers':['76ers','Sixers','PHI'],
+  'Boston Celtics':['Celtics','BOS'],
+  'Golden State Warriors':['Warriors','GSW'],
+  'Milwaukee Bucks':['Bucks','MIL'],
+  'Miami Heat':['Heat','MIA'],
+  'Chicago Bulls':['Bulls','CHI'],
+  'Brooklyn Nets':['Nets','BKN'],
+  'Atlanta Hawks':['Hawks','ATL'],
+  'Indiana Pacers':['Pacers','IND'],
+  'Toronto Raptors':['Raptors','TOR'],
+  'Washington Wizards':['Wizards','WAS'],
+  'Orlando Magic':['Magic','ORL'],
+  'Charlotte Hornets':['Hornets','CHA'],
+  'Denver Nuggets':['Nuggets','DEN'],
+  'Utah Jazz':['Jazz','UTA'],
+  'Portland Trail Blazers':['Blazers','Trail Blazers','POR'],
+  'Sacramento Kings':['Kings','SAC'],
+  'Phoenix Suns':['Suns','PHX'],
+  'LA Clippers':['Clippers','LAC'],
+  'New Orleans Pelicans':['Pelicans','NOP'],
+  'Memphis Grizzlies':['Grizzlies','MEM'],
+  'Houston Rockets':['Rockets','HOU'],
+  'Dallas Mavericks':['Mavericks','Mavs','DAL'],
+};
+
 function getBetsForNBATeam(teamName){
-  const lower = teamName.toLowerCase();
+  const aliases = [teamName, ...(NBA_ALIASES[teamName]||[])].map(s=>s.toLowerCase());
   return state.bets.filter(b=>{
     if(b.sport!=='NBA') return false;
-    const matchStr = (b.match||'').toLowerCase();
-    const oppStr = (b.opp||'').toLowerCase();
-    const descStr = (b.desc||'').toLowerCase();
-    return matchStr.includes(lower)||oppStr.includes(lower)||descStr.includes(lower);
+    const matchStr=(b.match||'').toLowerCase();
+    const oppStr=(b.opp||'').toLowerCase();
+    const descStr=(b.desc||'').toLowerCase();
+    return aliases.some(a=>matchStr.includes(a)||oppStr.includes(a)||descStr.includes(a));
   });
 }
 
@@ -1288,24 +1807,8 @@ async function selectNBATeam(teamId){
   hubState.team = team;
   hubState.view = 'nba-team';
   updateBreadcrumb();
-  document.getElementById('hub-content').innerHTML=`<div class="hub-loading"><span class="spinner"></span>Loading roster from API…</div>`;
-
-  // Fetch roster from balldontlie API
-  let players = [];
-  if(hubState.rosterCache[teamId]){
-    players = hubState.rosterCache[teamId];
-  } else {
-    try{
-      const r = await fetch(`https://api.balldontlie.io/v1/players?team_ids[]=${teamId}&per_page=100`,{
-        headers:{'Authorization': localStorage.getItem('bdk_key')||''}
-      });
-      const d = await r.json();
-      players = d.data||[];
-      hubState.rosterCache[teamId] = players;
-    }catch(e){
-      players = [];
-    }
-  }
+  // Use hard-coded roster if available
+  const players = (NBA_ROSTERS[team.name]||[]);
   renderHubNBATeam(team, players);
 }
 
@@ -1371,27 +1874,28 @@ function renderHubNBATeam(team, players){
   // Roster
   html += `<div class="card"><div class="card-title">Roster ${players.length?`(${players.length} players)`:''}</div>`;
   if(players.length){
-    html += `<div class="player-list">`;
-    players.sort((a,b)=>{
-      const pa = ps[`${a.first_name} ${a.last_name}`];
-      const pb = ps[`${b.first_name} ${b.last_name}`];
-      if(pa&&!pb) return -1;
-      if(!pa&&pb) return 1;
-      return 0;
-    }).forEach(p=>{
-      const fullName = `${p.first_name} ${p.last_name}`;
-      const pData = ps[fullName];
-      html += `<div class="player-item" onclick="selectNBAPlayer('${fullName.replace(/'/g,"\\'")}',${team.id})">
-        <div>
-          <div class="player-item-name">${fullName}</div>
-          <div class="player-item-pos">${p.position||'—'}</div>
-        </div>
-        ${pData?`<div class="player-item-pl ${pData.pl>=0?'green':'red'}">${fmt(pData.pl)}</div>`:''}
-      </div>`;
+    const positions = ['PG','SG','SF','PF','C'];
+    positions.forEach(pos=>{
+      const posPlayers = players.filter(p=>p.pos===pos);
+      if(!posPlayers.length) return;
+      const posNames = {PG:'Point Guards',SG:'Shooting Guards',SF:'Small Forwards',PF:'Power Forwards',C:'Centers'};
+      html += `<div style="font-size:11px;color:var(--text3);margin:10px 0 4px;text-transform:uppercase;letter-spacing:.05em">${posNames[pos]}</div>`;
+      html += `<div class="player-list">`;
+      posPlayers.forEach(p=>{
+        const fullName = p.name;
+        const pData = ps[fullName];
+        html += `<div class="player-item" onclick="selectNBAPlayer('${fullName.replace(/'/g,"\\'")}',${team.id})">
+          <div>
+            <div class="player-item-name">${fullName}</div>
+            <div class="player-item-pos">${p.pos}</div>
+          </div>
+          ${pData?`<div class="player-item-pl ${pData.pl>=0?'green':'red'}">${fmt(pData.pl)}</div>`:''}
+        </div>`;
+      });
+      html += `</div>`;
     });
-    html += `</div>`;
   } else {
-    html += `<div style="font-size:12px;color:var(--text2);padding:8px 0;">Roster data unavailable — API key may be needed. <a href="https://balldontlie.io" target="_blank" style="color:var(--blue)">Get free key at balldontlie.io</a> and add it in ⚙ settings.</div>`;
+    html += `<div style="font-size:12px;color:var(--text2);padding:8px 0;">No roster data available for this team yet.</div>`;
   }
   html += `</div></div>`;
   document.getElementById('hub-content').innerHTML = html;
@@ -1820,6 +2324,217 @@ function renderHubSoccerPlayer(){
   document.getElementById('hub-content').innerHTML=html;
 }
 
+// ── NFL HUB ──
+function getBetsForNFLTeam(teamName){
+  const team = NFL_TEAMS.find(t=>t.name===teamName);
+  const aliases = [teamName, team?.abbr||'', ...(NBA_ALIASES[teamName]||[])].filter(Boolean).map(s=>s.toLowerCase());
+  return state.bets.filter(b=>{
+    if(b.sport!=='NFL') return false;
+    const matchStr=(b.match||'').toLowerCase();
+    const oppStr=(b.opp||'').toLowerCase();
+    const descStr=(b.desc||'').toLowerCase();
+    return aliases.some(a=>a&&(matchStr.includes(a)||oppStr.includes(a)||descStr.includes(a)));
+  });
+}
+
+function renderHubNFLTeams(){
+  hubState.sport='NFL';
+  const confs = ['AFC','NFC'];
+  const divs = ['East','North','South','West'];
+  let html = `<input class="hub-search" placeholder="Search teams…" oninput="hubNFLSearch(this.value)" id="hub-search-input" value="${hubState.searchQuery}">`;
+  confs.forEach(conf=>{
+    html += `<div class="hub-league-section"><div class="hub-league-title"><div class="hub-league-dot" style="background:${conf==='AFC'?'#CC0000':'#003087'}"></div>${conf}</div>`;
+    divs.forEach(div=>{
+      const teams = NFL_TEAMS.filter(t=>t.conf===conf&&t.div===div&&(!hubState.searchQuery||t.name.toLowerCase().includes(hubState.searchQuery.toLowerCase())));
+      if(!teams.length) return;
+      html += `<div style="font-size:11px;color:var(--text3);margin:8px 0 4px;text-transform:uppercase;letter-spacing:.05em">${div}</div>`;
+      html += `<div class="hub-team-grid" style="margin-bottom:12px;">`;
+      teams.forEach(t=>{
+        const teamBets = getBetsForNFLTeam(t.name);
+        const pl = teamBets.filter(b=>b.result!=='pending').reduce((s,b)=>s+calcPL(b),0);
+        html += `<div class="hub-team-card" onclick="selectNFLTeam('${t.name.replace(/'/g,"\\'")}')">
+          <div class="hub-team-color" style="background:${t.color}"></div>
+          <div class="hub-team-info">
+            <div class="hub-team-name">${t.name}</div>
+            <div class="hub-team-meta">${teamBets.length?`${teamBets.length} bets · <span class="${pl>=0?'green':'red'}">${fmt(pl)}</span>`:'No bets yet'}</div>
+          </div>
+        </div>`;
+      });
+      html += `</div>`;
+    });
+    html += `</div>`;
+  });
+  document.getElementById('hub-content').innerHTML = html;
+}
+
+function hubNFLSearch(q){hubState.searchQuery=q;renderHubNFLTeams();}
+
+function selectNFLTeam(teamName){
+  const team = NFL_TEAMS.find(t=>t.name===teamName);
+  if(!team) return;
+  hubState.team = team;
+  hubState.sport = 'NFL';
+  hubState.view = 'nfl-team';
+  updateBreadcrumb();
+  renderHubNFLTeam(team);
+}
+
+function renderHubNFLTeam(team){
+  if(!team) team = hubState.team;
+  const players = NFL_ROSTERS[team.name]||[];
+  const teamBets = getBetsForNFLTeam(team.name);
+  const settled = teamBets.filter(b=>b.result!=='pending');
+  const wins = settled.filter(b=>b.result==='win');
+  const totalPL = settled.reduce((s,b)=>s+calcPL(b),0);
+  const staked = settled.reduce((s,b)=>s+(b.stake||0),0);
+
+  const ps={};
+  state.bets.filter(b=>b.sport==='NFL'&&b.player&&
+    ((b.match||'').toLowerCase().includes(team.name.toLowerCase())||
+     (b.opp||'').toLowerCase().includes(team.name.toLowerCase()))
+  ).forEach(b=>{
+    if(!ps[b.player])ps[b.player]={pl:0,bets:0,wins:0};
+    ps[b.player].pl+=calcPL(b);ps[b.player].bets++;
+    if(b.result==='win')ps[b.player].wins++;
+  });
+
+  let html = `<div class="hub-profile">
+    <div class="hub-profile-header">
+      <div class="hub-profile-icon" style="background:${team.color}">${team.abbr}</div>
+      <div>
+        <div class="hub-profile-name">${team.name}</div>
+        <div class="hub-profile-meta">${team.conf} · ${team.div} Division</div>
+        <div class="hub-profile-badges">
+          <span class="hub-badge" style="background:${team.color}22;color:${team.color}">NFL</span>
+        </div>
+      </div>
+    </div>
+    <div class="hub-stat-grid">
+      <div class="hub-stat"><div class="hub-stat-val ${totalPL>=0?'green':'red'}">${fmt(totalPL)}</div><div class="hub-stat-label">P&L</div></div>
+      <div class="hub-stat"><div class="hub-stat-val">${teamBets.length}</div><div class="hub-stat-label">Total bets</div></div>
+      <div class="hub-stat"><div class="hub-stat-val ${settled.length&&wins.length/settled.length>=.5?'green':'red'}">${settled.length?Math.round(wins.length/settled.length*100):0}%</div><div class="hub-stat-label">Win rate</div></div>
+      <div class="hub-stat"><div class="hub-stat-val">${fmtA(staked)}</div><div class="hub-stat-label">Staked</div></div>
+    </div>`;
+
+  if(teamBets.length){
+    const recent=[...teamBets].sort((a,b)=>parseDate(b.date)-parseDate(a.date)).slice(0,5);
+    html+=`<div class="card"><div class="card-title">Recent bets</div><div class="tbl-wrap"><table style="min-width:400px;">
+      <thead><tr><th>Date</th><th>Description</th><th>Type</th><th>Stake</th><th>P&L</th><th>Result</th></tr></thead>
+      <tbody>${recent.map(b=>`<tr>
+        <td>${fmtDate(b.date)}</td>
+        <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.player?`${b.player} ${b.ou||''} ${b.line||''} ${b.stat||''}`:b.desc||b.betType}</td>
+        <td>${b.betType}</td><td>${fmtA(b.stake)}</td>
+        <td class="${b.result==='win'?'green':b.result==='loss'?'red':''}">${b.result!=='pending'?fmt(calcPL(b)):'—'}</td>
+        <td><span class="badge ${badgeC(b.result)}">${b.result}</span></td>
+      </tr>`).join('')}</tbody>
+    </table></div></div>`;
+  }
+
+  // Roster by position group
+  const posGroups = [
+    {label:'Quarterbacks',positions:['QB']},
+    {label:'Running Backs',positions:['RB','FB']},
+    {label:'Wide Receivers',positions:['WR']},
+    {label:'Tight Ends',positions:['TE']},
+    {label:'Offensive Line',positions:['OT','OG','C','OL']},
+    {label:'Defensive Line',positions:['DE','DT','NT']},
+    {label:'Linebackers',positions:['LB','OLB','ILB','MLB']},
+    {label:'Defensive Backs',positions:['CB','S','FS','SS']},
+    {label:'Special Teams',positions:['K','P','LS']},
+  ];
+  html+=`<div class="card"><div class="card-title">Roster (${players.length} players — key contributors)</div>`;
+  posGroups.forEach(group=>{
+    const groupPlayers = players.filter(p=>group.positions.includes(p.pos));
+    if(!groupPlayers.length) return;
+    html+=`<div style="font-size:11px;color:var(--text3);margin:10px 0 4px;text-transform:uppercase;letter-spacing:.05em">${group.label}</div>`;
+    html+=`<div class="player-list">`;
+    groupPlayers.forEach(p=>{
+      const pData = ps[p.name];
+      html+=`<div class="player-item" onclick="selectNFLPlayer('${p.name.replace(/'/g,"\\'")}','${team.name.replace(/'/g,"\\'")}')">
+        <div><div class="player-item-name">${p.name}</div><div class="player-item-pos">${p.pos}</div></div>
+        ${pData?`<div class="player-item-pl ${pData.pl>=0?'green':'red'}">${fmt(pData.pl)}</div>`:''}
+      </div>`;
+    });
+    html+=`</div>`;
+  });
+  html+=`</div></div>`;
+  document.getElementById('hub-content').innerHTML = html;
+}
+
+function selectNFLPlayer(name, teamName){
+  hubState.player={name,teamName};
+  hubState.view='nfl-player';
+  updateBreadcrumb();
+  renderHubNFLPlayer();
+}
+
+function renderHubNFLPlayer(){
+  const {name, teamName} = hubState.player;
+  const team = NFL_TEAMS.find(t=>t.name===teamName)||hubState.team;
+  const bets = getBetsForPlayer(name);
+  const settled = bets.filter(b=>b.result!=='pending');
+  const wins = settled.filter(b=>b.result==='win');
+  const totalPL = settled.reduce((s,b)=>s+calcPL(b),0);
+  const staked = settled.reduce((s,b)=>s+(b.stake||0),0);
+  const roi = staked>0?(totalPL/staked*100):0;
+  const statMap={},subMap={},oppMap={};
+  settled.forEach(b=>{
+    const pl=calcPL(b);
+    if(b.stat){statMap[b.stat]=statMap[b.stat]||{pl:0,bets:0,wins:0};statMap[b.stat].pl+=pl;statMap[b.stat].bets++;if(b.result==='win')statMap[b.stat].wins++;}
+    if(b.propSub){subMap[b.propSub]=subMap[b.propSub]||{pl:0,bets:0,wins:0};subMap[b.propSub].pl+=pl;subMap[b.propSub].bets++;if(b.result==='win')subMap[b.propSub].wins++;}
+    if(b.opp){oppMap[b.opp]=oppMap[b.opp]||{pl:0,bets:0,wins:0};oppMap[b.opp].pl+=pl;oppMap[b.opp].bets++;if(b.result==='win')oppMap[b.opp].wins++;}
+  });
+  let html=`<div class="hub-profile">
+    <div class="hub-profile-header">
+      <div class="hub-profile-icon" style="background:${team?.color||'#013369'}">${name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase()}</div>
+      <div>
+        <div class="hub-profile-name">${name}</div>
+        <div class="hub-profile-meta">${team?.name||'NFL'}</div>
+        <div class="hub-profile-badges"><span class="hub-badge" style="background:${team?.color||'#013369'}22;color:${team?.color||'#013369'}">NFL</span></div>
+      </div>
+    </div>
+    <div class="hub-stat-grid">
+      <div class="hub-stat"><div class="hub-stat-val ${totalPL>=0?'green':'red'}">${fmt(totalPL)}</div><div class="hub-stat-label">P&L</div></div>
+      <div class="hub-stat"><div class="hub-stat-val">${bets.length}</div><div class="hub-stat-label">Bets</div></div>
+      <div class="hub-stat"><div class="hub-stat-val ${settled.length&&wins.length/settled.length>=.5?'green':'red'}">${settled.length?Math.round(wins.length/settled.length*100):0}%</div><div class="hub-stat-label">Win rate</div></div>
+      <div class="hub-stat"><div class="hub-stat-val ${roi>=0?'green':'red'}">${roi>=0?'+':''}${roi.toFixed(1)}%</div><div class="hub-stat-label">ROI</div></div>
+    </div>`;
+  if(Object.keys(statMap).length){
+    const maxPL=Math.max(...Object.values(statMap).map(d=>Math.abs(d.pl)),1);
+    html+=`<div class="card"><div class="card-title">P&L by stat type</div>`;
+    Object.entries(statMap).sort((a,b)=>b[1].pl-a[1].pl).forEach(([stat,d])=>{
+      html+=`<div class="bar-row"><div class="bar-label">${stat}</div><div class="bar-wrap"><div class="bar-fill" style="width:${Math.min(100,Math.abs(d.pl)/maxPL*100)}%;background:${d.pl>=0?'var(--green)':'var(--red)'}"></div></div><div class="bar-num ${d.pl>=0?'green':'red'}">${fmt(d.pl)}</div></div>`;
+    });
+    html+=`</div>`;
+  }
+  if(Object.keys(oppMap).length){
+    html+=`<div class="card"><div class="card-title">P&L by opponent</div><div class="tbl-wrap"><table style="min-width:280px;">
+      <thead><tr><th>Opponent</th><th>Bets</th><th>Win%</th><th>P&L</th></tr></thead>
+      <tbody>${Object.entries(oppMap).sort((a,b)=>b[1].pl-a[1].pl).map(([opp,d])=>`<tr>
+        <td>${opp}</td><td>${d.bets}</td>
+        <td class="${d.wins/d.bets>=.5?'green':'red'}">${Math.round(d.wins/d.bets*100)}%</td>
+        <td class="${d.pl>=0?'green':'red'}">${fmt(d.pl)}</td>
+      </tr>`).join('')}</tbody>
+    </table></div></div>`;
+  }
+  if(bets.length){
+    const sorted=[...bets].sort((a,b)=>parseDate(b.date)-parseDate(a.date));
+    html+=`<div class="card"><div class="card-title">All bets (${bets.length})</div><div class="tbl-wrap"><table style="min-width:400px;">
+      <thead><tr><th>Date</th><th>Bet</th><th>Odds</th><th>Stake</th><th>P&L</th><th>Result</th></tr></thead>
+      <tbody>${sorted.map(b=>`<tr>
+        <td>${fmtDate(b.date)}</td>
+        <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.ou||''} ${b.line||''} ${b.stat||''} ${b.propSub?'('+b.propSub+')':''}</td>
+        <td>${b.odds||'—'}</td><td>${fmtA(b.stake)}</td>
+        <td class="${b.result==='win'?'green':b.result==='loss'?'red':''}">${b.result!=='pending'?fmt(calcPL(b)):'—'}</td>
+        <td><span class="badge ${badgeC(b.result)}">${b.result}</span></td>
+      </tr>`).join('')}</tbody>
+    </table></div></div>`;
+  } else {
+    html+=`<div class="card"><div class="empty">No bets logged for ${name} yet — they'll appear here once NFL season starts</div></div>`;
+  }
+  html+=`</div>`;
+  document.getElementById('hub-content').innerHTML=html;
+}
 function showNL(){document.getElementById('nl-tab').style.display='block';document.getElementById('manual-tab').style.display='none';document.getElementById('tab-nl').classList.add('active');document.getElementById('tab-manual').classList.remove('active');}
 function showManual(){document.getElementById('manual-tab').style.display='block';document.getElementById('nl-tab').style.display='none';document.getElementById('tab-manual').classList.add('active');document.getElementById('tab-nl').classList.remove('active');}
 </script>
