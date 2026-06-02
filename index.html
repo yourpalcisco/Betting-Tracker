@@ -90,6 +90,53 @@ tr:hover td{background:var(--bg2);}
 .parse-val{font-weight:500;text-align:right;max-width:60%;word-break:break-word;}
 .settings-row{display:flex;justify-content:flex-end;padding:8px 14px;border-bottom:1px solid var(--border);background:var(--bg);}
 .settings-link{font-size:11px;color:var(--text2);cursor:pointer;text-decoration:underline;}
+
+/* HUB STYLES */
+.hub-breadcrumb{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);margin-bottom:14px;flex-wrap:wrap;}
+.hub-breadcrumb span{cursor:pointer;color:var(--blue);text-decoration:underline;}
+.hub-breadcrumb span:last-child{color:var(--text);text-decoration:none;cursor:default;font-weight:500;}
+.hub-breadcrumb .sep{color:var(--text3);}
+.hub-sport-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:14px;}
+.hub-sport-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;cursor:pointer;transition:all .15s;text-align:center;}
+.hub-sport-card:hover{border-color:var(--border2);background:var(--bg3);}
+.hub-sport-icon{font-size:28px;margin-bottom:8px;}
+.hub-sport-name{font-weight:600;font-size:14px;}
+.hub-sport-sub{font-size:11px;color:var(--text2);margin-top:3px;}
+.hub-team-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;}
+.hub-team-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px 14px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:10px;}
+.hub-team-card:hover{border-color:var(--border2);background:var(--bg2);}
+.hub-team-color{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.hub-team-info{overflow:hidden;}
+.hub-team-name{font-weight:500;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.hub-team-meta{font-size:11px;color:var(--text2);margin-top:2px;}
+.hub-league-section{margin-bottom:20px;}
+.hub-league-title{font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+.hub-league-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.hub-profile{max-width:700px;}
+.hub-profile-header{display:flex;align-items:center;gap:14px;margin-bottom:18px;}
+.hub-profile-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#fff;flex-shrink:0;}
+.hub-profile-name{font-size:22px;font-weight:700;}
+.hub-profile-meta{font-size:13px;color:var(--text2);margin-top:3px;}
+.hub-profile-badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;}
+.hub-badge{font-size:11px;padding:3px 8px;border-radius:20px;font-weight:500;}
+.hub-stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;margin-bottom:14px;}
+.hub-stat{background:var(--bg2);border-radius:var(--radius);padding:10px 12px;text-align:center;}
+.hub-stat-val{font-size:20px;font-weight:700;margin-bottom:2px;}
+.hub-stat-label{font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;}
+.player-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:6px;margin-top:8px;}
+.player-item{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--bg2);border-radius:var(--radius);cursor:pointer;transition:all .15s;}
+.player-item:hover{background:var(--bg3);}
+.player-item-name{font-size:13px;font-weight:500;}
+.player-item-pos{font-size:11px;color:var(--text2);}
+.player-item-pl{font-size:12px;font-weight:600;}
+.hub-loading{text-align:center;padding:32px;color:var(--text2);}
+.hub-search{width:100%;padding:8px 12px;border:1px solid var(--border2);border-radius:var(--radius);background:var(--bg);color:var(--text);font-size:13px;margin-bottom:12px;outline:none;}
+.hub-search:focus{border-color:var(--blue);}
+.competition-tag{display:inline-block;font-size:10px;padding:2px 7px;border-radius:20px;font-weight:500;margin-right:4px;margin-bottom:3px;}
+@media(max-width:500px){
+  .hub-team-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));}
+  .hub-sport-grid{grid-template-columns:repeat(2,1fr);}
+}
 @media(max-width:500px){
   .metric-val{font-size:18px;}
   .page{padding:10px;}
@@ -123,6 +170,7 @@ tr:hover td{background:var(--bg2);}
   <button class="tab" onclick="switchTab('log',this)">Bets</button>
   <button class="tab" onclick="switchTab('add',this)">+ Log</button>
   <button class="tab" onclick="switchTab('props',this)">Props</button>
+  <button class="tab" onclick="switchTab('hub',this)">Hub</button>
   <button class="tab" onclick="switchTab('accounts',this)">Accounts</button>
   <button class="tab" onclick="switchTab('misc',this)">Misc</button>
 </div>
@@ -302,8 +350,13 @@ tr:hover td{background:var(--bg2);}
   </div>
 </div>
 
-<!-- PROPS -->
-<div id="props" class="page">
+<!-- HUB -->
+<div id="hub" class="page">
+  <div id="hub-breadcrumb" class="hub-breadcrumb"></div>
+  <div id="hub-content"></div>
+</div>
+
+
   <div class="chips" id="props-chips">
     <button class="chip active" onclick="setPropsF('all',this)">All sports</button>
     <button class="chip" onclick="setPropsF('NFL',this)">NFL</button>
@@ -640,7 +693,7 @@ function switchTab(t,el){
   document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
   document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
   el.classList.add('active');document.getElementById(t).classList.add('active');
-  ({dashboard:renderDash,log:renderLog,props:renderProps,accounts:renderAccounts,misc:renderMisc})[t]?.();
+  ({dashboard:renderDash,log:renderLog,props:renderProps,accounts:renderAccounts,misc:renderMisc,hub:renderHub})[t]?.();
 }
 function setP(tab,p,el){
   if(tab==='dash'){state.dashP=p;document.querySelectorAll('#dash-chips .chip').forEach(c=>c.classList.remove('active'));}
@@ -1016,6 +1069,755 @@ async function deleteMisc(id){
   if(!confirm('Delete?'))return;
   try{await sheetsApi({action:'deleteMisc',id});state.misc=state.misc.filter(m=>m.id!=id);renderMisc();toast('Deleted');}
   catch(e){toast('Error');}
+}
+
+// ── HUB ──
+const RAPIDAPI_KEY = '593beb6e15msh40a0a8565551f38p1e0aa6jsn5d51c017584f';
+
+const NBA_TEAMS = [
+  {id:1,name:'Atlanta Hawks',abbr:'ATL',color:'#C8102E',conf:'East',div:'Southeast'},
+  {id:2,name:'Boston Celtics',abbr:'BOS',color:'#007A33',conf:'East',div:'Atlantic'},
+  {id:3,name:'Brooklyn Nets',abbr:'BKN',color:'#000000',conf:'East',div:'Atlantic'},
+  {id:4,name:'Charlotte Hornets',abbr:'CHA',color:'#1D1160',conf:'East',div:'Southeast'},
+  {id:5,name:'Chicago Bulls',abbr:'CHI',color:'#CE1141',conf:'East',div:'Central'},
+  {id:6,name:'Cleveland Cavaliers',abbr:'CLE',color:'#860038',conf:'East',div:'Central'},
+  {id:7,name:'Dallas Mavericks',abbr:'DAL',color:'#00538C',conf:'West',div:'Southwest'},
+  {id:8,name:'Denver Nuggets',abbr:'DEN',color:'#0E2240',conf:'West',div:'Northwest'},
+  {id:9,name:'Detroit Pistons',abbr:'DET',color:'#C8102E',conf:'East',div:'Central'},
+  {id:10,name:'Golden State Warriors',abbr:'GSW',color:'#1D428A',conf:'West',div:'Pacific'},
+  {id:11,name:'Houston Rockets',abbr:'HOU',color:'#CE1141',conf:'West',div:'Southwest'},
+  {id:12,name:'Indiana Pacers',abbr:'IND',color:'#002D62',conf:'East',div:'Central'},
+  {id:13,name:'LA Clippers',abbr:'LAC',color:'#C8102E',conf:'West',div:'Pacific'},
+  {id:14,name:'Los Angeles Lakers',abbr:'LAL',color:'#552583',conf:'West',div:'Pacific'},
+  {id:15,name:'Memphis Grizzlies',abbr:'MEM',color:'#5D76A9',conf:'West',div:'Southwest'},
+  {id:16,name:'Miami Heat',abbr:'MIA',color:'#98002E',conf:'East',div:'Southeast'},
+  {id:17,name:'Milwaukee Bucks',abbr:'MIL',color:'#00471B',conf:'East',div:'Central'},
+  {id:18,name:'Minnesota Timberwolves',abbr:'MIN',color:'#0C2340',conf:'West',div:'Northwest'},
+  {id:19,name:'New Orleans Pelicans',abbr:'NOP',color:'#0C2340',conf:'West',div:'Southwest'},
+  {id:20,name:'New York Knicks',abbr:'NYK',color:'#F58426',conf:'East',div:'Atlantic'},
+  {id:21,name:'Oklahoma City Thunder',abbr:'OKC',color:'#007AC1',conf:'West',div:'Northwest'},
+  {id:22,name:'Orlando Magic',abbr:'ORL',color:'#0077C0',conf:'East',div:'Southeast'},
+  {id:23,name:'Philadelphia 76ers',abbr:'PHI',color:'#006BB6',conf:'East',div:'Atlantic'},
+  {id:24,name:'Phoenix Suns',abbr:'PHX',color:'#1D1160',conf:'West',div:'Pacific'},
+  {id:25,name:'Portland Trail Blazers',abbr:'POR',color:'#E03A3E',conf:'West',div:'Northwest'},
+  {id:26,name:'Sacramento Kings',abbr:'SAC',color:'#5A2D81',conf:'West',div:'Pacific'},
+  {id:27,name:'San Antonio Spurs',abbr:'SAS',color:'#C4CED4',conf:'West',div:'Southwest'},
+  {id:28,name:'Toronto Raptors',abbr:'TOR',color:'#CE1141',conf:'East',div:'Atlantic'},
+  {id:29,name:'Utah Jazz',abbr:'UTA',color:'#002B5C',conf:'West',div:'Northwest'},
+  {id:30,name:'Washington Wizards',abbr:'WAS',color:'#002B5C',conf:'East',div:'Southeast'},
+  {id:31,name:'New Jersey Nets',abbr:'NJN',color:'#000000',conf:'West',div:'Southwest'},
+];
+
+const SOCCER_LEAGUES = {
+  'Premier League':{color:'#380E62',country:'England',flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',apiId:39},
+  'La Liga':{color:'#EF3340',country:'Spain',flag:'🇪🇸',apiId:140},
+  'Bundesliga':{color:'#D3010C',country:'Germany',flag:'🇩🇪',apiId:78},
+  'Serie A':{color:'#1B67B2',country:'Italy',flag:'🇮🇹',apiId:135},
+  'Ligue 1':{color:'#003189',country:'France',flag:'🇫🇷',apiId:61},
+  'Champions League':{color:'#1B2759',country:'Europe',flag:'🇪🇺',apiId:2},
+  'Europa League':{color:'#F77F00',country:'Europe',flag:'🇪🇺',apiId:3},
+  'Conference League':{color:'#00A651',country:'Europe',flag:'🇪🇺',apiId:848},
+  'MLS':{color:'#C0392B',country:'USA',flag:'🇺🇸',apiId:253},
+  'EFL':{color:'#63C3D0',country:'England',flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',apiId:40},
+};
+
+// Hub navigation state
+let hubState = {
+  view: 'sports', // sports | nba-teams | nba-team | nba-player | soccer-leagues | soccer-league | soccer-team | soccer-player
+  sport: null,
+  league: null,
+  team: null,
+  player: null,
+  rosterCache: {},
+  teamCache: {},
+  searchQuery: ''
+};
+
+function renderHub(){
+  updateBreadcrumb();
+  const el = document.getElementById('hub-content');
+  el.innerHTML = '<div class="hub-loading"><span class="spinner"></span>Loading…</div>';
+  const v = hubState.view;
+  if(v==='sports') renderHubSports();
+  else if(v==='nba-teams') renderHubNBATeams();
+  else if(v==='nba-team') renderHubNBATeam();
+  else if(v==='nba-player') renderHubNBAPlayer();
+  else if(v==='soccer-leagues') renderHubSoccerLeagues();
+  else if(v==='soccer-league') renderHubSoccerLeague();
+  else if(v==='soccer-team') renderHubSoccerTeam();
+  else if(v==='soccer-player') renderHubSoccerPlayer();
+}
+
+function updateBreadcrumb(){
+  const bc = document.getElementById('hub-breadcrumb');
+  const parts = [];
+  parts.push(`<span onclick="hubNav('sports')">Hub</span>`);
+  if(hubState.sport==='NBA'){
+    parts.push(`<span class="sep">›</span>`);
+    if(hubState.view==='nba-teams') parts.push(`<span>NBA</span>`);
+    else parts.push(`<span onclick="hubNav('nba-teams')">NBA</span>`);
+  }
+  if(hubState.sport==='Soccer'){
+    parts.push(`<span class="sep">›</span>`);
+    if(hubState.view==='soccer-leagues') parts.push(`<span>Soccer</span>`);
+    else parts.push(`<span onclick="hubNav('soccer-leagues')">Soccer</span>`);
+  }
+  if(hubState.league){
+    parts.push(`<span class="sep">›</span>`);
+    const lv = hubState.sport==='NBA'?'nba-teams':'soccer-league';
+    if(hubState.team||hubState.player) parts.push(`<span onclick="hubNav('${lv}')">${hubState.league}</span>`);
+    else parts.push(`<span>${hubState.league}</span>`);
+  }
+  if(hubState.team){
+    parts.push(`<span class="sep">›</span>`);
+    const tv = hubState.sport==='NBA'?'nba-team':'soccer-team';
+    if(hubState.player) parts.push(`<span onclick="hubNav('${tv}')">${hubState.team.name||hubState.team}</span>`);
+    else parts.push(`<span>${hubState.team.name||hubState.team}</span>`);
+  }
+  if(hubState.player){
+    parts.push(`<span class="sep">›</span>`);
+    parts.push(`<span>${hubState.player.name||hubState.player}</span>`);
+  }
+  bc.innerHTML = parts.join('');
+}
+
+function hubNav(view, extra={}){
+  if(view==='sports'){hubState={...hubState,view:'sports',sport:null,league:null,team:null,player:null};}
+  else if(view==='nba-teams'){hubState={...hubState,view:'nba-teams',sport:'NBA',league:null,team:null,player:null};}
+  else if(view==='soccer-leagues'){hubState={...hubState,view:'soccer-leagues',sport:'Soccer',league:null,team:null,player:null};}
+  else if(view==='soccer-league'){hubState={...hubState,view:'soccer-league',team:null,player:null};}
+  else if(view==='nba-team'){hubState={...hubState,view:'nba-team',player:null};}
+  else if(view==='soccer-team'){hubState={...hubState,view:'soccer-team',player:null};}
+  else{hubState={...hubState,view,...extra};}
+  renderHub();
+}
+
+function renderHubSports(){
+  document.getElementById('hub-content').innerHTML=`
+    <div class="hub-sport-grid">
+      <div class="hub-sport-card" onclick="hubNav('nba-teams',{sport:'NBA'})">
+        <div class="hub-sport-icon">🏀</div>
+        <div class="hub-sport-name">NBA</div>
+        <div class="hub-sport-sub">30 teams</div>
+      </div>
+      <div class="hub-sport-card" onclick="hubNav('soccer-leagues',{sport:'Soccer'})">
+        <div class="hub-sport-icon">⚽</div>
+        <div class="hub-sport-name">Soccer</div>
+        <div class="hub-sport-sub">${Object.keys(SOCCER_LEAGUES).length} leagues</div>
+      </div>
+    </div>`;
+}
+
+function renderHubNBATeams(){
+  hubState.sport='NBA';
+  const bettedTeams = new Set();
+  state.bets.filter(b=>b.sport==='NBA').forEach(b=>{
+    if(b.match){
+      b.match.split(' vs ').forEach(t=>bettedTeams.add(t.trim()));
+    }
+    if(b.opp) bettedTeams.add(b.opp.trim());
+  });
+
+  const confs = ['East','West'];
+  let html = `<input class="hub-search" placeholder="Search teams…" oninput="hubSearch(this.value)" id="hub-search-input" value="${hubState.searchQuery}">`;
+
+  confs.forEach(conf=>{
+    const teams = NBA_TEAMS.filter(t=>t.conf===conf);
+    const divs = [...new Set(teams.map(t=>t.div))];
+    html += `<div class="hub-league-section"><div class="hub-league-title">${conf}ern Conference</div>`;
+    divs.forEach(div=>{
+      const divTeams = teams.filter(t=>t.div===div&&(!hubState.searchQuery||t.name.toLowerCase().includes(hubState.searchQuery.toLowerCase())));
+      if(!divTeams.length) return;
+      html += `<div style="font-size:11px;color:var(--text3);margin:8px 0 4px;text-transform:uppercase;letter-spacing:.05em">${div}</div>`;
+      html += `<div class="hub-team-grid" style="margin-bottom:12px;">`;
+      divTeams.forEach(t=>{
+        const teamBets = getBetsForNBATeam(t.name);
+        const pl = teamBets.filter(b=>b.result!=='pending').reduce((s,b)=>s+calcPL(b),0);
+        const hasBets = teamBets.length>0;
+        html += `<div class="hub-team-card" onclick="selectNBATeam(${t.id})">
+          <div class="hub-team-color" style="background:${t.color}"></div>
+          <div class="hub-team-info">
+            <div class="hub-team-name">${t.name}</div>
+            <div class="hub-team-meta">${hasBets?`${teamBets.length} bets · <span class="${pl>=0?'green':'red'}">${fmt(pl)}</span>`:'No bets yet'}</div>
+          </div>
+        </div>`;
+      });
+      html += `</div>`;
+    });
+    html += `</div>`;
+  });
+  document.getElementById('hub-content').innerHTML = html;
+}
+
+function hubSearch(q){
+  hubState.searchQuery=q;
+  if(hubState.view==='nba-teams') renderHubNBATeams();
+  else if(hubState.view==='soccer-league') renderHubSoccerLeague();
+}
+
+function getBetsForNBATeam(teamName){
+  const lower = teamName.toLowerCase();
+  return state.bets.filter(b=>{
+    if(b.sport!=='NBA') return false;
+    const matchStr = (b.match||'').toLowerCase();
+    const oppStr = (b.opp||'').toLowerCase();
+    const descStr = (b.desc||'').toLowerCase();
+    return matchStr.includes(lower)||oppStr.includes(lower)||descStr.includes(lower);
+  });
+}
+
+function getBetsForSoccerTeam(teamName){
+  const lower = teamName.toLowerCase();
+  return state.bets.filter(b=>{
+    if(b.sport!=='Soccer') return false;
+    const matchStr = (b.match||'').toLowerCase();
+    const oppStr = (b.opp||'').toLowerCase();
+    const descStr = (b.desc||'').toLowerCase();
+    return matchStr.includes(lower)||oppStr.includes(lower)||descStr.includes(lower);
+  });
+}
+
+function getBetsForPlayer(playerName){
+  const lower = playerName.toLowerCase();
+  return state.bets.filter(b=>(b.player||'').toLowerCase()===lower);
+}
+
+async function selectNBATeam(teamId){
+  const team = NBA_TEAMS.find(t=>t.id===teamId);
+  if(!team) return;
+  hubState.team = team;
+  hubState.view = 'nba-team';
+  updateBreadcrumb();
+  document.getElementById('hub-content').innerHTML=`<div class="hub-loading"><span class="spinner"></span>Loading roster from API…</div>`;
+
+  // Fetch roster from balldontlie API
+  let players = [];
+  if(hubState.rosterCache[teamId]){
+    players = hubState.rosterCache[teamId];
+  } else {
+    try{
+      const r = await fetch(`https://api.balldontlie.io/v1/players?team_ids[]=${teamId}&per_page=100`,{
+        headers:{'Authorization': localStorage.getItem('bdk_key')||''}
+      });
+      const d = await r.json();
+      players = d.data||[];
+      hubState.rosterCache[teamId] = players;
+    }catch(e){
+      players = [];
+    }
+  }
+  renderHubNBATeam(team, players);
+}
+
+function renderHubNBATeam(team, players){
+  if(!team) team = hubState.team;
+  if(!players) players = hubState.rosterCache[team?.id]||[];
+
+  const teamBets = getBetsForNBATeam(team.name);
+  const settled = teamBets.filter(b=>b.result!=='pending');
+  const wins = settled.filter(b=>b.result==='win');
+  const totalPL = settled.reduce((s,b)=>s+calcPL(b),0);
+  const staked = settled.reduce((s,b)=>s+(b.stake||0),0);
+
+  // Player bet stats
+  const playerStats = {};
+  state.bets.filter(b=>b.sport==='NBA'&&b.player&&(b.match||'').toLowerCase().includes(team.name.toLowerCase())||
+    state.bets.filter(b=>b.sport==='NBA'&&b.player).find(b=>b.player)).forEach(b=>{});
+
+  // All props where player is on this team (by match string)
+  const propBets = state.bets.filter(b=>b.sport==='NBA'&&b.betType==='Player Prop'&&b.player&&
+    ((b.match||'').toLowerCase().includes(team.name.toLowerCase())||(b.opp||'').toLowerCase().includes(team.name.toLowerCase())));
+
+  const ps = {};
+  propBets.forEach(b=>{
+    if(!ps[b.player])ps[b.player]={pl:0,bets:0,wins:0};
+    ps[b.player].pl+=calcPL(b);ps[b.player].bets++;
+    if(b.result==='win')ps[b.player].wins++;
+  });
+
+  let html = `<div class="hub-profile">
+    <div class="hub-profile-header">
+      <div class="hub-profile-icon" style="background:${team.color}">${team.abbr}</div>
+      <div>
+        <div class="hub-profile-name">${team.name}</div>
+        <div class="hub-profile-meta">${team.conf}ern Conference · ${team.div} Division</div>
+        <div class="hub-profile-badges">
+          <span class="hub-badge" style="background:${team.color}22;color:${team.color}">NBA</span>
+        </div>
+      </div>
+    </div>
+    <div class="hub-stat-grid">
+      <div class="hub-stat"><div class="hub-stat-val ${totalPL>=0?'green':'red'}">${fmt(totalPL)}</div><div class="hub-stat-label">P&L</div></div>
+      <div class="hub-stat"><div class="hub-stat-val">${teamBets.length}</div><div class="hub-stat-label">Total bets</div></div>
+      <div class="hub-stat"><div class="hub-stat-val ${settled.length&&wins.length/settled.length>=.5?'green':'red'}">${settled.length?Math.round(wins.length/settled.length*100):0}%</div><div class="hub-stat-label">Win rate</div></div>
+      <div class="hub-stat"><div class="hub-stat-val">${fmtA(staked)}</div><div class="hub-stat-label">Staked</div></div>
+    </div>`;
+
+  // Recent bets on this team
+  if(teamBets.length){
+    const recent = [...teamBets].sort((a,b)=>parseDate(b.date)-parseDate(a.date)).slice(0,5);
+    html += `<div class="card"><div class="card-title">Recent bets</div><div class="tbl-wrap"><table style="min-width:400px;">
+      <thead><tr><th>Date</th><th>Description</th><th>Type</th><th>Stake</th><th>P&L</th><th>Result</th></tr></thead>
+      <tbody>${recent.map(b=>`<tr>
+        <td>${fmtDate(b.date)}</td>
+        <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.player?`${b.player} ${b.ou||''} ${b.line||''} ${b.stat||''}`:b.desc||b.betType}</td>
+        <td>${b.betType}</td><td>${fmtA(b.stake)}</td>
+        <td class="${b.result==='win'?'green':b.result==='loss'?'red':''}">${b.result!=='pending'?fmt(calcPL(b)):'—'}</td>
+        <td><span class="badge ${badgeC(b.result)}">${b.result}</span></td>
+      </tr>`).join('')}</tbody>
+    </table></div></div>`;
+  }
+
+  // Roster
+  html += `<div class="card"><div class="card-title">Roster ${players.length?`(${players.length} players)`:''}</div>`;
+  if(players.length){
+    html += `<div class="player-list">`;
+    players.sort((a,b)=>{
+      const pa = ps[`${a.first_name} ${a.last_name}`];
+      const pb = ps[`${b.first_name} ${b.last_name}`];
+      if(pa&&!pb) return -1;
+      if(!pa&&pb) return 1;
+      return 0;
+    }).forEach(p=>{
+      const fullName = `${p.first_name} ${p.last_name}`;
+      const pData = ps[fullName];
+      html += `<div class="player-item" onclick="selectNBAPlayer('${fullName.replace(/'/g,"\\'")}',${team.id})">
+        <div>
+          <div class="player-item-name">${fullName}</div>
+          <div class="player-item-pos">${p.position||'—'}</div>
+        </div>
+        ${pData?`<div class="player-item-pl ${pData.pl>=0?'green':'red'}">${fmt(pData.pl)}</div>`:''}
+      </div>`;
+    });
+    html += `</div>`;
+  } else {
+    html += `<div style="font-size:12px;color:var(--text2);padding:8px 0;">Roster data unavailable — API key may be needed. <a href="https://balldontlie.io" target="_blank" style="color:var(--blue)">Get free key at balldontlie.io</a> and add it in ⚙ settings.</div>`;
+  }
+  html += `</div></div>`;
+  document.getElementById('hub-content').innerHTML = html;
+}
+
+function selectNBAPlayer(name, teamId){
+  hubState.player = {name, teamId};
+  hubState.view = 'nba-player';
+  updateBreadcrumb();
+  renderHubNBAPlayer();
+}
+
+function renderHubNBAPlayer(){
+  const {name, teamId} = hubState.player;
+  const team = NBA_TEAMS.find(t=>t.id===teamId);
+  const bets = getBetsForPlayer(name);
+  const settled = bets.filter(b=>b.result!=='pending');
+  const wins = settled.filter(b=>b.result==='win');
+  const totalPL = settled.reduce((s,b)=>s+calcPL(b),0);
+  const staked = settled.reduce((s,b)=>s+(b.stake||0),0);
+  const roi = staked>0?(totalPL/staked*100):0;
+
+  // Breakdown by stat
+  const statMap={}, subMap={}, oppMap={};
+  settled.forEach(b=>{
+    const pl=calcPL(b);
+    if(b.stat)statMap[b.stat]=(statMap[b.stat]||{pl:0,bets:0,wins:0});
+    if(b.stat){statMap[b.stat].pl+=pl;statMap[b.stat].bets++;if(b.result==='win')statMap[b.stat].wins++;}
+    if(b.propSub)subMap[b.propSub]=(subMap[b.propSub]||{pl:0,bets:0,wins:0});
+    if(b.propSub){subMap[b.propSub].pl+=pl;subMap[b.propSub].bets++;if(b.result==='win')subMap[b.propSub].wins++;}
+    if(b.opp)oppMap[b.opp]=(oppMap[b.opp]||{pl:0,bets:0,wins:0});
+    if(b.opp){oppMap[b.opp].pl+=pl;oppMap[b.opp].bets++;if(b.result==='win')oppMap[b.opp].wins++;}
+  });
+
+  let html = `<div class="hub-profile">
+    <div class="hub-profile-header">
+      <div class="hub-profile-icon" style="background:${team?.color||'#888'}">${name.split(' ').map(n=>n[0]).join('').slice(0,2)}</div>
+      <div>
+        <div class="hub-profile-name">${name}</div>
+        <div class="hub-profile-meta">${team?.name||'NBA'}</div>
+        <div class="hub-profile-badges">
+          <span class="hub-badge" style="background:${team?.color||'#888'}22;color:${team?.color||'#888'}">NBA</span>
+        </div>
+      </div>
+    </div>
+    <div class="hub-stat-grid">
+      <div class="hub-stat"><div class="hub-stat-val ${totalPL>=0?'green':'red'}">${fmt(totalPL)}</div><div class="hub-stat-label">P&L</div></div>
+      <div class="hub-stat"><div class="hub-stat-val">${bets.length}</div><div class="hub-stat-label">Bets</div></div>
+      <div class="hub-stat"><div class="hub-stat-val ${settled.length&&wins.length/settled.length>=.5?'green':'red'}">${settled.length?Math.round(wins.length/settled.length*100):0}%</div><div class="hub-stat-label">Win rate</div></div>
+      <div class="hub-stat"><div class="hub-stat-val ${roi>=0?'green':'red'}">${roi>=0?'+':''}${roi.toFixed(1)}%</div><div class="hub-stat-label">ROI</div></div>
+    </div>`;
+
+  if(Object.keys(statMap).length){
+    html+=`<div class="card"><div class="card-title">P&L by stat type</div>`;
+    Object.entries(statMap).sort((a,b)=>b[1].pl-a[1].pl).forEach(([stat,d])=>{
+      html+=`<div class="bar-row">
+        <div class="bar-label">${stat}</div>
+        <div class="bar-wrap"><div class="bar-fill" style="width:${Math.min(100,Math.abs(d.pl)/Math.max(...Object.values(statMap).map(x=>Math.abs(x.pl)),1)*100)}%;background:${d.pl>=0?'var(--green)':'var(--red)'}"></div></div>
+        <div class="bar-num ${d.pl>=0?'green':'red'}">${fmt(d.pl)}</div>
+      </div>`;
+    });
+    html+=`</div>`;
+  }
+
+  if(Object.keys(subMap).length){
+    html+=`<div class="card"><div class="card-title">P&L by time period</div>`;
+    Object.entries(subMap).sort((a,b)=>b[1].pl-a[1].pl).forEach(([sub,d])=>{
+      html+=`<div class="bar-row">
+        <div class="bar-label">${sub}</div>
+        <div class="bar-wrap"><div class="bar-fill" style="width:${Math.min(100,Math.abs(d.pl)/Math.max(...Object.values(subMap).map(x=>Math.abs(x.pl)),1)*100)}%;background:${d.pl>=0?'var(--green)':'var(--red)'}"></div></div>
+        <div class="bar-num ${d.pl>=0?'green':'red'}">${fmt(d.pl)}</div>
+      </div>`;
+    });
+    html+=`</div>`;
+  }
+
+  if(Object.keys(oppMap).length){
+    html+=`<div class="card"><div class="card-title">P&L by opponent</div><div class="tbl-wrap"><table style="min-width:280px;">
+      <thead><tr><th>Opponent</th><th>Bets</th><th>Win%</th><th>P&L</th></tr></thead>
+      <tbody>${Object.entries(oppMap).sort((a,b)=>b[1].pl-a[1].pl).map(([opp,d])=>`<tr>
+        <td>${opp}</td><td>${d.bets}</td>
+        <td class="${d.bets&&d.wins/d.bets>=.5?'green':'red'}">${Math.round(d.wins/d.bets*100)}%</td>
+        <td class="${d.pl>=0?'green':'red'}">${fmt(d.pl)}</td>
+      </tr>`).join('')}</tbody>
+    </table></div></div>`;
+  }
+
+  if(bets.length){
+    const sorted = [...bets].sort((a,b)=>parseDate(b.date)-parseDate(a.date));
+    html+=`<div class="card"><div class="card-title">All bets (${bets.length})</div><div class="tbl-wrap"><table style="min-width:420px;">
+      <thead><tr><th>Date</th><th>Bet</th><th>Sub</th><th>Odds</th><th>Stake</th><th>P&L</th><th>Result</th></tr></thead>
+      <tbody>${sorted.map(b=>`<tr>
+        <td>${fmtDate(b.date)}</td>
+        <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.ou||''} ${b.line||''} ${b.stat||''}</td>
+        <td>${b.propSub||'—'}</td>
+        <td>${b.odds||'—'}</td>
+        <td>${fmtA(b.stake)}</td>
+        <td class="${b.result==='win'?'green':b.result==='loss'?'red':''}">${b.result!=='pending'?fmt(calcPL(b)):'—'}</td>
+        <td><span class="badge ${badgeC(b.result)}">${b.result}</span></td>
+      </tr>`).join('')}</tbody>
+    </table></div></div>`;
+  } else {
+    html+=`<div class="card"><div class="empty">No bets logged for ${name} yet</div></div>`;
+  }
+
+  html+=`</div>`;
+  document.getElementById('hub-content').innerHTML = html;
+}
+
+// ── SOCCER HUB ──
+function renderHubSoccerLeagues(){
+  hubState.sport='Soccer';
+  let html = `<div class="hub-league-section"><div class="hub-team-grid">`;
+  Object.entries(SOCCER_LEAGUES).forEach(([name,info])=>{
+    const leagueBets = state.bets.filter(b=>b.sport==='Soccer'&&b.league===name);
+    const pl = leagueBets.filter(b=>b.result!=='pending').reduce((s,b)=>s+calcPL(b),0);
+    html+=`<div class="hub-team-card" onclick="selectSoccerLeague('${name.replace(/'/g,"\\'")}')">
+      <div class="hub-team-color" style="background:${info.color}"></div>
+      <div class="hub-team-info">
+        <div class="hub-team-name">${info.flag} ${name}</div>
+        <div class="hub-team-meta">${leagueBets.length?`${leagueBets.length} bets · <span class="${pl>=0?'green':'red'}">${fmt(pl)}</span>`:'No bets yet'}</div>
+      </div>
+    </div>`;
+  });
+  html+=`</div></div>`;
+  document.getElementById('hub-content').innerHTML = html;
+}
+
+async function selectSoccerLeague(leagueName){
+  hubState.league = leagueName;
+  hubState.view = 'soccer-league';
+  updateBreadcrumb();
+  document.getElementById('hub-content').innerHTML=`<div class="hub-loading"><span class="spinner"></span>Loading teams…</div>`;
+
+  const leagueInfo = SOCCER_LEAGUES[leagueName];
+  let teams = [];
+
+  if(hubState.teamCache[leagueName]){
+    teams = hubState.teamCache[leagueName];
+  } else {
+    try{
+      const rapidKey = localStorage.getItem('rapid_key')||RAPIDAPI_KEY;
+      const season = 2024;
+      const r = await fetch(`https://api-football-v1.p.rapidapi.com/v3/teams?league=${leagueInfo.apiId}&season=${season}`,{
+        headers:{
+          'X-RapidAPI-Key': rapidKey,
+          'X-RapidAPI-Host': 'api-football-v1.p.rapidapi.com'
+        }
+      });
+      const d = await r.json();
+      teams = (d.response||[]).map(t=>({
+        id: t.team.id,
+        name: t.team.name,
+        logo: t.team.logo,
+        country: t.team.country
+      })).sort((a,b)=>a.name.localeCompare(b.name));
+      hubState.teamCache[leagueName] = teams;
+    }catch(e){
+      teams = [];
+    }
+  }
+  renderHubSoccerLeague(teams);
+}
+
+function renderHubSoccerLeague(teams){
+  if(!teams) teams = hubState.teamCache[hubState.league]||[];
+  const leagueInfo = SOCCER_LEAGUES[hubState.league];
+
+  let html = `<input class="hub-search" placeholder="Search teams…" oninput="hubSoccerSearch(this.value)" id="hub-search-input">`;
+
+  if(!teams.length){
+    html+=`<div style="font-size:13px;color:var(--text2);padding:12px 0;">Could not load teams from API. Showing teams from your bet history instead.</div>`;
+    // Fall back to bet history
+    const betTeams = new Set();
+    state.bets.filter(b=>b.sport==='Soccer'&&b.league===hubState.league).forEach(b=>{
+      if(b.match) b.match.split(' vs ').forEach(t=>betTeams.add(t.trim()));
+    });
+    teams = [...betTeams].map(name=>({id:name,name,logo:null})).sort((a,b)=>a.name.localeCompare(b.name));
+  }
+
+  html+=`<div class="hub-team-grid">`;
+  teams.filter(t=>!hubState.searchQuery||t.name.toLowerCase().includes(hubState.searchQuery.toLowerCase())).forEach(t=>{
+    const teamBets = getBetsForSoccerTeam(t.name);
+    const pl = teamBets.filter(b=>b.result!=='pending').reduce((s,b)=>s+calcPL(b),0);
+    html+=`<div class="hub-team-card" onclick="selectSoccerTeam(${JSON.stringify(t).replace(/"/g,'&quot;')})">
+      ${t.logo?`<img src="${t.logo}" style="width:20px;height:20px;object-fit:contain;flex-shrink:0;" onerror="this.style.display='none'">`:`<div class="hub-team-color" style="background:${leagueInfo?.color||'#888'}"></div>`}
+      <div class="hub-team-info">
+        <div class="hub-team-name">${t.name}</div>
+        <div class="hub-team-meta">${teamBets.length?`${teamBets.length} bets · <span class="${pl>=0?'green':'red'}">${fmt(pl)}</span>`:'No bets yet'}</div>
+      </div>
+    </div>`;
+  });
+  html+=`</div>`;
+  document.getElementById('hub-content').innerHTML = html;
+}
+
+function hubSoccerSearch(q){
+  hubState.searchQuery=q;
+  renderHubSoccerLeague();
+}
+
+async function selectSoccerTeam(team){
+  if(typeof team==='string') try{team=JSON.parse(team);}catch(e){}
+  hubState.team = team;
+  hubState.view = 'soccer-team';
+  updateBreadcrumb();
+  document.getElementById('hub-content').innerHTML=`<div class="hub-loading"><span class="spinner"></span>Loading squad…</div>`;
+
+  let players = [];
+  const cacheKey = `soccer_${team.id}`;
+  if(hubState.rosterCache[cacheKey]){
+    players = hubState.rosterCache[cacheKey];
+  } else {
+    try{
+      const rapidKey = localStorage.getItem('rapid_key')||RAPIDAPI_KEY;
+      const r = await fetch(`https://api-football-v1.p.rapidapi.com/v3/players/squads?team=${team.id}`,{
+        headers:{
+          'X-RapidAPI-Key': rapidKey,
+          'X-RapidAPI-Host': 'api-football-v1.p.rapidapi.com'
+        }
+      });
+      const d = await r.json();
+      players = ((d.response||[])[0]?.players||[]).map(p=>({
+        id: p.id,
+        name: p.name,
+        age: p.age,
+        number: p.number,
+        position: p.position,
+        photo: p.photo
+      })).sort((a,b)=>{
+        const posOrder={Goalkeeper:0,Defender:1,Midfielder:2,Attacker:3};
+        return (posOrder[a.position]??4)-(posOrder[b.position]??4)||a.name.localeCompare(b.name);
+      });
+      hubState.rosterCache[cacheKey] = players;
+    }catch(e){players=[];}
+  }
+  renderHubSoccerTeam(team, players);
+}
+
+function renderHubSoccerTeam(team, players){
+  if(!team) team = hubState.team;
+  if(!players) players = hubState.rosterCache[`soccer_${team?.id}`]||[];
+  const leagueInfo = SOCCER_LEAGUES[hubState.league]||{color:'#888'};
+
+  const teamBets = getBetsForSoccerTeam(team.name);
+  const settled = teamBets.filter(b=>b.result!=='pending');
+  const wins = settled.filter(b=>b.result==='win');
+  const totalPL = settled.reduce((s,b)=>s+calcPL(b),0);
+  const staked = settled.reduce((s,b)=>s+(b.stake||0),0);
+
+  // Competitions this team appears in
+  const comps = [...new Set(teamBets.map(b=>b.league).filter(Boolean))];
+
+  // Player bet stats from bet history
+  const ps={};
+  state.bets.filter(b=>b.sport==='Soccer'&&b.player&&
+    ((b.match||'').toLowerCase().includes(team.name.toLowerCase())||
+     (b.opp||'').toLowerCase().includes(team.name.toLowerCase())||
+     (b.desc||'').toLowerCase().includes(team.name.toLowerCase()))
+  ).forEach(b=>{
+    if(!ps[b.player])ps[b.player]={pl:0,bets:0,wins:0};
+    ps[b.player].pl+=calcPL(b);ps[b.player].bets++;
+    if(b.result==='win')ps[b.player].wins++;
+  });
+
+  let html = `<div class="hub-profile">
+    <div class="hub-profile-header">
+      ${team.logo?`<img src="${team.logo}" style="width:48px;height:48px;object-fit:contain;border-radius:8px;">`:`<div class="hub-profile-icon" style="background:${leagueInfo.color}">${team.name.slice(0,2).toUpperCase()}</div>`}
+      <div>
+        <div class="hub-profile-name">${team.name}</div>
+        <div class="hub-profile-meta">${hubState.league}</div>
+        <div class="hub-profile-badges">
+          ${comps.map(c=>`<span class="hub-badge" style="background:${LEAGUE_COLORS[c]||'#888'}22;color:${LEAGUE_COLORS[c]||'#888'}">${c}</span>`).join('')}
+        </div>
+      </div>
+    </div>
+    <div class="hub-stat-grid">
+      <div class="hub-stat"><div class="hub-stat-val ${totalPL>=0?'green':'red'}">${fmt(totalPL)}</div><div class="hub-stat-label">P&L</div></div>
+      <div class="hub-stat"><div class="hub-stat-val">${teamBets.length}</div><div class="hub-stat-label">Total bets</div></div>
+      <div class="hub-stat"><div class="hub-stat-val ${settled.length&&wins.length/settled.length>=.5?'green':'red'}">${settled.length?Math.round(wins.length/settled.length*100):0}%</div><div class="hub-stat-label">Win rate</div></div>
+      <div class="hub-stat"><div class="hub-stat-val">${fmtA(staked)}</div><div class="hub-stat-label">Staked</div></div>
+    </div>`;
+
+  if(teamBets.length){
+    const recent=[...teamBets].sort((a,b)=>parseDate(b.date)-parseDate(a.date)).slice(0,5);
+    html+=`<div class="card"><div class="card-title">Recent bets</div><div class="tbl-wrap"><table style="min-width:400px;">
+      <thead><tr><th>Date</th><th>Description</th><th>Type</th><th>Stake</th><th>P&L</th><th>Result</th></tr></thead>
+      <tbody>${recent.map(b=>`<tr>
+        <td>${fmtDate(b.date)}</td>
+        <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.player?`${b.player} ${b.ou||''} ${b.line||''} ${b.stat||''}`:b.desc||b.betType}</td>
+        <td>${b.betType}</td><td>${fmtA(b.stake)}</td>
+        <td class="${b.result==='win'?'green':b.result==='loss'?'red':''}">${b.result!=='pending'?fmt(calcPL(b)):'—'}</td>
+        <td><span class="badge ${badgeC(b.result)}">${b.result}</span></td>
+      </tr>`).join('')}</tbody>
+    </table></div></div>`;
+  }
+
+  // Squad
+  html+=`<div class="card"><div class="card-title">Squad ${players.length?`(${players.length} players)`:''}</div>`;
+  if(players.length){
+    const positions=['Goalkeeper','Defender','Midfielder','Attacker'];
+    positions.forEach(pos=>{
+      const posPlayers = players.filter(p=>p.position===pos);
+      if(!posPlayers.length) return;
+      html+=`<div style="font-size:11px;color:var(--text3);margin:10px 0 4px;text-transform:uppercase;letter-spacing:.05em">${pos}s</div>`;
+      html+=`<div class="player-list">`;
+      posPlayers.forEach(p=>{
+        const pData = ps[p.name];
+        html+=`<div class="player-item" onclick="selectSoccerPlayer('${p.name.replace(/'/g,"\\'")}',${JSON.stringify(team.id)})">
+          <div style="display:flex;align-items:center;gap:8px;">
+            ${p.photo?`<img src="${p.photo}" style="width:24px;height:24px;border-radius:50%;object-fit:cover;" onerror="this.style.display='none'">`:``}
+            <div>
+              <div class="player-item-name">${p.name}</div>
+              <div class="player-item-pos">#${p.number||'—'} · ${p.age||'—'} yrs</div>
+            </div>
+          </div>
+          ${pData?`<div class="player-item-pl ${pData.pl>=0?'green':'red'}">${fmt(pData.pl)}</div>`:''}
+        </div>`;
+      });
+      html+=`</div>`;
+    });
+  } else {
+    html+=`<div style="font-size:12px;color:var(--text2);padding:8px 0;">Squad data unavailable from API. Players with logged bets appear below.</div>`;
+    if(Object.keys(ps).length){
+      html+=`<div class="player-list">`;
+      Object.entries(ps).sort((a,b)=>b[1].pl-a[1].pl).forEach(([name,d])=>{
+        html+=`<div class="player-item" onclick="selectSoccerPlayer('${name.replace(/'/g,"\\'")}',${JSON.stringify(team.id)})">
+          <div><div class="player-item-name">${name}</div><div class="player-item-pos">${d.bets} bets</div></div>
+          <div class="player-item-pl ${d.pl>=0?'green':'red'}">${fmt(d.pl)}</div>
+        </div>`;
+      });
+      html+=`</div>`;
+    }
+  }
+  html+=`</div></div>`;
+  document.getElementById('hub-content').innerHTML=html;
+}
+
+function selectSoccerPlayer(name, teamId){
+  hubState.player={name,teamId};
+  hubState.view='soccer-player';
+  updateBreadcrumb();
+  renderHubSoccerPlayer();
+}
+
+function renderHubSoccerPlayer(){
+  const {name, teamId} = hubState.player;
+  const team = hubState.team;
+  const leagueInfo = SOCCER_LEAGUES[hubState.league]||{color:'#888'};
+
+  const bets = getBetsForPlayer(name);
+  const settled = bets.filter(b=>b.result!=='pending');
+  const wins = settled.filter(b=>b.result==='win');
+  const totalPL = settled.reduce((s,b)=>s+calcPL(b),0);
+  const staked = settled.reduce((s,b)=>s+(b.stake||0),0);
+  const roi = staked>0?(totalPL/staked*100):0;
+
+  const statMap={}, compMap={};
+  settled.forEach(b=>{
+    const pl=calcPL(b);
+    if(b.stat){statMap[b.stat]=statMap[b.stat]||{pl:0,bets:0,wins:0};statMap[b.stat].pl+=pl;statMap[b.stat].bets++;if(b.result==='win')statMap[b.stat].wins++;}
+    if(b.league){compMap[b.league]=compMap[b.league]||{pl:0,bets:0,wins:0};compMap[b.league].pl+=pl;compMap[b.league].bets++;if(b.result==='win')compMap[b.league].wins++;}
+  });
+
+  let html=`<div class="hub-profile">
+    <div class="hub-profile-header">
+      <div class="hub-profile-icon" style="background:${leagueInfo.color}">${name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase()}</div>
+      <div>
+        <div class="hub-profile-name">${name}</div>
+        <div class="hub-profile-meta">${team?.name||hubState.league}</div>
+        <div class="hub-profile-badges">
+          ${Object.keys(compMap).map(c=>`<span class="hub-badge" style="background:${LEAGUE_COLORS[c]||'#888'}22;color:${LEAGUE_COLORS[c]||'#888'}">${c}</span>`).join('')}
+        </div>
+      </div>
+    </div>
+    <div class="hub-stat-grid">
+      <div class="hub-stat"><div class="hub-stat-val ${totalPL>=0?'green':'red'}">${fmt(totalPL)}</div><div class="hub-stat-label">P&L</div></div>
+      <div class="hub-stat"><div class="hub-stat-val">${bets.length}</div><div class="hub-stat-label">Bets</div></div>
+      <div class="hub-stat"><div class="hub-stat-val ${settled.length&&wins.length/settled.length>=.5?'green':'red'}">${settled.length?Math.round(wins.length/settled.length*100):0}%</div><div class="hub-stat-label">Win rate</div></div>
+      <div class="hub-stat"><div class="hub-stat-val ${roi>=0?'green':'red'}">${roi>=0?'+':''}${roi.toFixed(1)}%</div><div class="hub-stat-label">ROI</div></div>
+    </div>`;
+
+  if(Object.keys(compMap).length>1){
+    html+=`<div class="card"><div class="card-title">P&L by competition</div>`;
+    const maxPL=Math.max(...Object.values(compMap).map(d=>Math.abs(d.pl)),1);
+    Object.entries(compMap).sort((a,b)=>b[1].pl-a[1].pl).forEach(([comp,d])=>{
+      html+=`<div class="bar-row">
+        <div class="bar-label">${comp}</div>
+        <div class="bar-wrap"><div class="bar-fill" style="width:${Math.min(100,Math.abs(d.pl)/maxPL*100)}%;background:${d.pl>=0?'var(--green)':'var(--red)'}"></div></div>
+        <div class="bar-num ${d.pl>=0?'green':'red'}">${fmt(d.pl)}</div>
+      </div>`;
+    });
+    html+=`</div>`;
+  }
+
+  if(Object.keys(statMap).length){
+    html+=`<div class="card"><div class="card-title">P&L by stat type</div>`;
+    const maxPL=Math.max(...Object.values(statMap).map(d=>Math.abs(d.pl)),1);
+    Object.entries(statMap).sort((a,b)=>b[1].pl-a[1].pl).forEach(([stat,d])=>{
+      html+=`<div class="bar-row">
+        <div class="bar-label">${stat}</div>
+        <div class="bar-wrap"><div class="bar-fill" style="width:${Math.min(100,Math.abs(d.pl)/maxPL*100)}%;background:${d.pl>=0?'var(--green)':'var(--red)'}"></div></div>
+        <div class="bar-num ${d.pl>=0?'green':'red'}">${fmt(d.pl)}</div>
+      </div>`;
+    });
+    html+=`</div>`;
+  }
+
+  if(bets.length){
+    const sorted=[...bets].sort((a,b)=>parseDate(b.date)-parseDate(a.date));
+    html+=`<div class="card"><div class="card-title">All bets (${bets.length})</div><div class="tbl-wrap"><table style="min-width:420px;">
+      <thead><tr><th>Date</th><th>Competition</th><th>Stat / Line</th><th>Odds</th><th>Stake</th><th>P&L</th><th>Result</th></tr></thead>
+      <tbody>${sorted.map(b=>`<tr>
+        <td>${fmtDate(b.date)}</td>
+        <td><span style="font-size:10px;padding:2px 6px;border-radius:10px;background:${LEAGUE_COLORS[b.league]||'#888'}22;color:${LEAGUE_COLORS[b.league]||'#888'}">${b.league||'—'}</span></td>
+        <td>${b.ou||''} ${b.line||''} ${b.stat||''}</td>
+        <td>${b.odds||'—'}</td><td>${fmtA(b.stake)}</td>
+        <td class="${b.result==='win'?'green':b.result==='loss'?'red':''}">${b.result!=='pending'?fmt(calcPL(b)):'—'}</td>
+        <td><span class="badge ${badgeC(b.result)}">${b.result}</span></td>
+      </tr>`).join('')}</tbody>
+    </table></div></div>`;
+  } else {
+    html+=`<div class="card"><div class="empty">No player props logged for ${name} yet</div></div>`;
+  }
+  html+=`</div>`;
+  document.getElementById('hub-content').innerHTML=html;
 }
 
 function showNL(){document.getElementById('nl-tab').style.display='block';document.getElementById('manual-tab').style.display='none';document.getElementById('tab-nl').classList.add('active');document.getElementById('tab-manual').classList.remove('active');}
