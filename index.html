@@ -361,6 +361,53 @@ tr:hover td{background:var(--bg2);}
   <div id="hub-content"></div>
 </div>
 
+<!-- PROPS -->
+<div id="props" class="page">
+  <div class="chips" id="props-chips">
+    <button class="chip active" onclick="setPropsF('all',this)">All sports</button>
+    <button class="chip" onclick="setPropsF('NFL',this)">NFL</button>
+    <button class="chip" onclick="setPropsF('NBA',this)">NBA</button>
+    <button class="chip" onclick="setPropsF('Soccer',this)">Soccer</button>
+    <button class="chip" onclick="setPropsF('Golf',this)">Golf</button>
+    <button class="chip" onclick="setPropsF('NHL',this)">NHL</button>
+    <button class="chip" onclick="setPropsF('MLB',this)">MLB</button>
+  </div>
+  <div class="card">
+    <div class="card-title">Player profitability</div>
+    <div class="tbl-wrap">
+      <table id="player-tbl">
+        <thead><tr>
+          <th onclick="sortTable('players','name')">Player</th>
+          <th onclick="sortTable('players','bets')">Bets</th>
+          <th onclick="sortTable('players','wins')">W</th>
+          <th onclick="sortTable('players','losses')">L</th>
+          <th onclick="sortTable('players','winPct')">Win%</th>
+          <th onclick="sortTable('players','pl')">P&L</th>
+        </tr></thead>
+        <tbody id="player-board"></tbody>
+      </table>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Best matchups</div>
+    <div class="tbl-wrap">
+      <table id="matchup-tbl">
+        <thead><tr>
+          <th onclick="sortTable('matchups','matchup')">Matchup</th>
+          <th onclick="sortTable('matchups','bets')">Bets</th>
+          <th onclick="sortTable('matchups','winPct')">Win%</th>
+          <th onclick="sortTable('matchups','pl')">P&L</th>
+        </tr></thead>
+        <tbody id="matchup-table"></tbody>
+      </table>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+    <div class="card"><div class="card-title">By subcategory</div><div id="subcat-bars"></div></div>
+    <div class="card"><div class="card-title">By stat type</div><div id="stat-bars"></div></div>
+  </div>
+</div>
+
 
   <div class="chips" id="props-chips">
     <button class="chip active" onclick="setPropsF('all',this)">All sports</button>
