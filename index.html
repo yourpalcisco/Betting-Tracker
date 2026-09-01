@@ -280,6 +280,7 @@ tr:hover td{background:rgba(255,255,255,0.02);}
         <div class="card-title" style="color:var(--gold);">🏈 Best Ball</div>
         <div class="metric-grid" id="bucket-bestball" style="margin-bottom:0;"></div>
       </div>
+
     </div>
     <!-- OVERALL METRICS -->
     <div class="metric-grid" id="dash-metrics"></div>
@@ -2001,13 +2002,11 @@ function renderAccounts(){
 
   const sbTotal=BOOKS.reduce((s,b)=>s+(parseFloat(state.accounts[b]?.balance)||0),0);
   const bankBal=parseFloat(state.accounts['SoFi Bank']?.balance)||0;
-  const miscTotal=(state.misc||[]).reduce((s,e)=>s+(parseFloat(e.pl)||0),0);
-  const grand=sbTotal+bankBal+miscTotal;
+  const grand=sbTotal+bankBal;
   document.getElementById('bank-summary').innerHTML=`
     <div class="metric-grid" style="margin-bottom:0;">
-      <div class="metric"><div class="metric-label">All Sportsbooks</div><div class="metric-val ${sbTotal>=0?'pos':'neg'}">${fmtC(sbTotal)}</div></div>
       <div class="metric"><div class="metric-label">SoFi Bank</div><div class="metric-val ${bankBal>=0?'pos':'neg'}">${fmtC(bankBal)}</div></div>
-      <div class="metric"><div class="metric-label">Fantasy / Misc</div><div class="metric-val ${miscTotal>=0?'pos':'neg'}">${fmt(miscTotal)}</div></div>
+      <div class="metric"><div class="metric-label">All Sportsbooks</div><div class="metric-val ${sbTotal>=0?'pos':'neg'}">${fmtC(sbTotal)}</div></div>
       <div class="metric highlight"><div class="metric-label" style="font-weight:700">Total Bankroll</div><div class="metric-val ${grand>=0?'pos':'neg'}">${fmtC(grand)}</div></div>
     </div>`;
 
