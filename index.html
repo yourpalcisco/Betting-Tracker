@@ -248,6 +248,8 @@ tr:hover td{background:rgba(255,255,255,0.02);}
   <button class="tab active" onclick="switchTab('dashboard',this)">Dashboard</button>
   <button class="tab" onclick="switchTab('log',this)">Bets</button>
   <button class="tab" onclick="switchTab('add',this)">+ Log Bet</button>
+  <button class="tab" onclick="switchTab('dfs',this)">DFS</button>
+  <button class="tab" onclick="switchTab('bestball',this)">Best Ball</button>
   <button class="tab" onclick="switchTab('props',this)">Props</button>
   <button class="tab" onclick="switchTab('hub',this)">Hub</button>
   <button class="tab" onclick="switchTab('accounts',this)">Accounts</button>
@@ -264,6 +266,22 @@ tr:hover td{background:rgba(255,255,255,0.02);}
   </div>
   <div id="dash-loading" style="text-align:center;padding:48px;color:var(--text3);"><span class="spinner"></span>Connecting to database…</div>
   <div id="dash-content" style="display:none;">
+    <!-- THREE BUCKETS -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px;" id="bucket-grid">
+      <div class="card" style="border-color:rgba(0,102,204,0.3);margin-bottom:0;">
+        <div class="card-title" style="color:var(--blue);">🎯 Sports Betting</div>
+        <div class="metric-grid" id="bucket-betting" style="margin-bottom:0;"></div>
+      </div>
+      <div class="card" style="border-color:rgba(255,102,0,0.3);margin-bottom:0;">
+        <div class="card-title" style="color:var(--orange);">🏆 DFS</div>
+        <div class="metric-grid" id="bucket-dfs" style="margin-bottom:0;"></div>
+      </div>
+      <div class="card" style="border-color:rgba(240,165,0,0.3);margin-bottom:0;">
+        <div class="card-title" style="color:var(--gold);">🏈 Best Ball</div>
+        <div class="metric-grid" id="bucket-bestball" style="margin-bottom:0;"></div>
+      </div>
+    </div>
+    <!-- OVERALL METRICS -->
     <div class="metric-grid" id="dash-metrics"></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
       <div class="card"><div class="card-title">P&L by Sport / League / Tournament</div><div id="sport-bars"></div></div>
@@ -613,6 +631,69 @@ tr:hover td{background:rgba(255,255,255,0.02);}
       </table>
     </div>
     <button class="btn" style="margin-top:10px" onclick="addMisc()">+ Add Entry</button>
+  </div>
+</div>
+
+<!-- DFS -->
+<div id="dfs" class="page">
+  <div class="chips" id="dfs-chips">
+    <button class="chip active" onclick="setDfsP('all',this)">All time</button>
+    <button class="chip" onclick="setDfsP('today',this)">Today</button>
+    <button class="chip" onclick="setDfsP('week',this)">Week</button>
+    <button class="chip" onclick="setDfsP('month',this)">Month</button>
+  </div>
+  <div class="metric-grid" id="dfs-metrics"></div>
+  <div class="card">
+    <div class="card-title">DFS Contests — DraftKings</div>
+    <div class="tbl-wrap">
+      <table id="dfs-tbl">
+        <thead><tr>
+          <th onclick="sortTable('dfs','date')">Date</th>
+          <th onclick="sortTable('dfs','name')">Contest</th>
+          <th onclick="sortTable('dfs','sport')">Sport</th>
+          <th onclick="sortTable('dfs','entry')">Entry</th>
+          <th onclick="sortTable('dfs','pl')">P&L</th>
+          <th onclick="sortTable('dfs','status')">Status</th>
+          <th class="no-sort"></th>
+        </tr></thead>
+        <tbody id="dfs-table"></tbody>
+      </table>
+    </div>
+    <button class="btn primary" style="margin-top:10px" onclick="addDFS()">+ Log DFS Contest</button>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+    <div class="card"><div class="card-title">P&L by Sport</div><div id="dfs-sport-bars"></div></div>
+    <div class="card"><div class="card-title">P&L by Contest Type</div><div id="dfs-type-bars"></div></div>
+  </div>
+</div>
+
+<!-- BEST BALL -->
+<div id="bestball" class="page">
+  <div class="chips" id="bb-chips">
+    <button class="chip active" onclick="setBbP('all',this)">All time</button>
+    <button class="chip" onclick="setBbP('today',this)">Today</button>
+    <button class="chip" onclick="setBbP('week',this)">Week</button>
+    <button class="chip" onclick="setBbP('month',this)">Month</button>
+  </div>
+  <div class="metric-grid" id="bb-metrics"></div>
+  <div class="card">
+    <div class="card-title">Best Ball Drafts — Underdog Fantasy</div>
+    <div class="tbl-wrap">
+      <table id="bb-tbl">
+        <thead><tr>
+          <th onclick="sortTable('bestball','date')">Date</th>
+          <th onclick="sortTable('bestball','name')">Draft</th>
+          <th onclick="sortTable('bestball','sport')">Sport</th>
+          <th onclick="sortTable('bestball','season')">Season</th>
+          <th onclick="sortTable('bestball','entry')">Entry</th>
+          <th onclick="sortTable('bestball','pl')">P&L</th>
+          <th onclick="sortTable('bestball','status')">Status</th>
+          <th class="no-sort"></th>
+        </tr></thead>
+        <tbody id="bb-table"></tbody>
+      </table>
+    </div>
+    <button class="btn primary" style="margin-top:10px" onclick="addBestBall()">+ Log Best Ball Draft</button>
   </div>
 </div>
 
@@ -1307,7 +1388,7 @@ const NBA_ALIASES = {
 };
 
 // ── STATE ──
-let state={bets:[],transactions:[],accounts:{},misc:[],dashP:'all',logP:'all',propsF:'all',miscF:'all',parsedBet:null,parsedBetImg:null};
+let state={bets:[],transactions:[],accounts:{},misc:[],dfs:[],bestball:[],dashP:'all',logP:'all',propsF:'all',miscF:'all',dfsP:'all',bbP:'all',parsedBet:null,parsedBetImg:null};
 let dataLoaded=false;
 
 // ── SORT STATE ──
@@ -1317,7 +1398,9 @@ const sortState={
   matchups:{col:'pl',dir:'desc'},
   accounts:{col:'name',dir:'asc'},
   transactions:{col:'date',dir:'desc'},
-  misc:{col:'pl',dir:'desc'}
+  misc:{col:'pl',dir:'desc'},
+  dfs:{col:'date',dir:'desc'},
+  bestball:{col:'date',dir:'desc'}
 };
 
 // ── DATE HELPERS ──
@@ -1338,12 +1421,12 @@ function fmtDate(raw){
 // ── SORT ──
 function sortTable(table,col){
   if(sortState[table].col===col){sortState[table].dir=sortState[table].dir==='asc'?'desc':'asc';}
-  else{sortState[table].col=col;sortState[table].dir=col==='date'||col==='name'||col==='matchup'?'asc':'desc';}
+  else{sortState[table].col=col;sortState[table].dir=col==='date'||col==='name'?'asc':'desc';}
   updateSortHeaders(table);
-  ({bets:renderLog,players:renderProps,matchups:renderProps,accounts:renderAccounts,transactions:renderAccounts,misc:renderMisc})[table]?.();
+  ({bets:renderLog,players:renderProps,matchups:renderProps,accounts:renderAccounts,transactions:renderAccounts,misc:renderMisc,dfs:renderDFS,bestball:renderBestBall})[table]?.();
 }
 function updateSortHeaders(table){
-  const ids={bets:'bets-tbl',players:'player-tbl',matchups:'matchup-tbl',accounts:'acct-tbl',transactions:'tx-tbl',misc:'misc-tbl'};
+  const ids={bets:'bets-tbl',players:'player-tbl',matchups:'matchup-tbl',accounts:'acct-tbl',transactions:'tx-tbl',misc:'misc-tbl',dfs:'dfs-tbl',bestball:'bb-tbl'};
   const tbl=document.getElementById(ids[table]);if(!tbl)return;
   tbl.querySelectorAll('th').forEach(th=>th.classList.remove('sort-asc','sort-desc'));
   tbl.querySelectorAll('th:not(.no-sort)').forEach(th=>{
@@ -1413,8 +1496,24 @@ function toast(msg,dur=2500){
   t.textContent=msg;t.style.opacity='1';setTimeout(()=>t.style.opacity='0',dur);
 }
 async function sheetsApi(payload){
-  const r=await fetch(SHEETS_API,{method:'POST',body:JSON.stringify(payload),headers:{'Content-Type':'text/plain'}});
-  return r.json();
+  try{
+    const r=await fetch(SHEETS_API,{
+      method:'POST',
+      body:JSON.stringify(payload),
+      headers:{'Content-Type':'text/plain'},
+      redirect:'follow'
+    });
+    const text=await r.text();
+    try{return JSON.parse(text);}catch(e){return{ok:false,error:'Parse error: '+text.slice(0,100)};}
+  }catch(e){
+    // Fallback to GET for getData
+    if(payload.action==='getData'){
+      const r=await fetch(SHEETS_API+'?action=getData',{method:'GET',redirect:'follow'});
+      const text=await r.text();
+      try{return JSON.parse(text);}catch(e2){return{ok:false,error:text};}
+    }
+    throw e;
+  }
 }
 function fmt(n){return(n>=0?'+':'')+fmtA(n);}
 function fmtA(n){return'$'+Math.abs(parseFloat(n)||0).toFixed(2);}
@@ -1457,21 +1556,31 @@ function barRows(obj,colorFn){
 // ── DATA LOAD ──
 async function loadData(){
   try{
-    const r=await sheetsApi({action:'getData'});
-    if(r.ok){
-      state.bets=(r.data.bets||[]).map(b=>({...b,stake:parseFloat(b.stake)||0,actualReturn:parseFloat(b.actualReturn)||0}));
-      state.transactions=r.data.transactions||[];
-      state.accounts=r.data.accounts||{};
-      state.misc=(r.data.misc||[]).map(m=>({...m,entry:parseFloat(m.entry)||0,pl:parseFloat(m.pl)||0}));
+    const r=await fetch(SHEETS_API+'?action=getData',{method:'GET',redirect:'follow'});
+    const text=await r.text();
+    const json=JSON.parse(text);
+    if(json.ok){
+      state.bets=(json.data.bets||[]).map(b=>({...b,stake:parseFloat(b.stake)||0,actualReturn:parseFloat(b.actualReturn)||0}));
+      state.transactions=json.data.transactions||[];
+      state.accounts=json.data.accounts||{};
+      state.misc=(json.data.misc||[]).map(m=>({...m,entry:parseFloat(m.entry)||0,pl:parseFloat(m.pl)||0}));
+      state.dfs=(json.data.dfs||[]).map(d=>({...d,entry:parseFloat(d.entry)||0,winnings:parseFloat(d.winnings)||0,pl:parseFloat(d.pl)||0}));
+      state.bestball=(json.data.bestball||[]).map(b=>({...b,entry:parseFloat(b.entry)||0,winnings:parseFloat(b.winnings)||0,pl:parseFloat(b.pl)||0}));
       BOOKS.forEach(b=>{if(!state.accounts[b])state.accounts[b]={balance:0,deposited:0,withdrawn:0};});
       if(!state.accounts['SoFi Bank'])state.accounts['SoFi Bank']={balance:0,deposited:0,withdrawn:0};
+      if(!state.accounts['DraftKings DFS'])state.accounts['DraftKings DFS']={balance:0,deposited:0,withdrawn:0};
+      if(!state.accounts['Underdog Best Ball'])state.accounts['Underdog Best Ball']={balance:0,deposited:0,withdrawn:0};
       dataLoaded=true;
       updateTopbarBankroll();
     }
   }catch(e){toast('Connection error — check Sheets');}
 }
 function updateTopbarBankroll(){
-  const total=BOOKS.reduce((s,b)=>s+(parseFloat(state.accounts[b]?.balance)||0),0)+(parseFloat(state.accounts['SoFi Bank']?.balance)||0);
+  const sbTotal=BOOKS.reduce((s,b)=>s+(parseFloat(state.accounts[b]?.balance)||0),0);
+  const dfsTotal=(parseFloat(state.accounts['DraftKings DFS']?.balance)||0);
+  const bbTotal=(parseFloat(state.accounts['Underdog Best Ball']?.balance)||0);
+  const bankTotal=(parseFloat(state.accounts['SoFi Bank']?.balance)||0);
+  const total=sbTotal+dfsTotal+bbTotal+bankTotal;
   const el=document.getElementById('topbar-bankroll');
   if(el){el.textContent=fmtC(total);el.style.color=total>=0?'var(--blue)':'var(--orange)';}
 }
@@ -1481,7 +1590,7 @@ function switchTab(t,el){
   document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
   document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
   el.classList.add('active');document.getElementById(t).classList.add('active');
-  ({dashboard:renderDash,log:renderLog,props:renderProps,accounts:renderAccounts,misc:renderMisc,hub:renderHub})[t]?.();
+  ({dashboard:renderDash,log:renderLog,props:renderProps,accounts:renderAccounts,misc:renderMisc,hub:renderHub,dfs:renderDFS,bestball:renderBestBall})[t]?.();
 }
 function setP(tab,p,el){
   if(tab==='dash'){state.dashP=p;document.querySelectorAll('#dash-chips .chip').forEach(c=>c.classList.remove('active'));}
@@ -1507,9 +1616,67 @@ async function renderDash(){
   const staked=settled.reduce((s,b)=>s+(b.stake||0),0);
   const roi=staked>0?(totalPL/staked*100):0;
   const wr=settled.length?wins.length/settled.length:0;
+
+  // ── THREE BUCKETS ──
+  // Sports Betting bucket
+  const betPL=totalPL;
+  const betStaked=staked;
+  document.getElementById('bucket-betting').innerHTML=`
+    <div class="metric" style="background:transparent;border:none;padding:4px 0;">
+      <div class="metric-label">P&L</div>
+      <div class="metric-val ${betPL>=0?'pos':'neg'}">${fmt(betPL)}</div>
+    </div>
+    <div class="metric" style="background:transparent;border:none;padding:4px 0;">
+      <div class="metric-label">Bets</div>
+      <div class="metric-val">${bets.length}</div>
+    </div>
+    <div class="metric" style="background:transparent;border:none;padding:4px 0;">
+      <div class="metric-label">Win%</div>
+      <div class="metric-val ${wr>=.5?'pos':'neg'}">${Math.round(wr*100)}%</div>
+    </div>`;
+
+  // DFS bucket
+  const dfsEntries=filterP(state.dfs,state.dashP);
+  const dfsPL=dfsEntries.reduce((s,d)=>s+d.pl,0);
+  const dfsEntered=dfsEntries.reduce((s,d)=>s+d.entry,0);
+  const dfsROI=dfsEntered>0?(dfsPL/dfsEntered*100):0;
+  document.getElementById('bucket-dfs').innerHTML=`
+    <div class="metric" style="background:transparent;border:none;padding:4px 0;">
+      <div class="metric-label">P&L</div>
+      <div class="metric-val ${dfsPL>=0?'pos':'neg'}">${fmt(dfsPL)}</div>
+    </div>
+    <div class="metric" style="background:transparent;border:none;padding:4px 0;">
+      <div class="metric-label">Contests</div>
+      <div class="metric-val">${dfsEntries.length}</div>
+    </div>
+    <div class="metric" style="background:transparent;border:none;padding:4px 0;">
+      <div class="metric-label">ROI</div>
+      <div class="metric-val ${dfsROI>=0?'pos':'neg'}">${dfsROI>=0?'+':''}${dfsROI.toFixed(1)}%</div>
+    </div>`;
+
+  // Best Ball bucket
+  const bbEntries=filterP(state.bestball,state.dashP);
+  const bbPL=bbEntries.reduce((s,b)=>s+b.pl,0);
+  const bbEntered=bbEntries.reduce((s,b)=>s+b.entry,0);
+  const bbROI=bbEntered>0?(bbPL/bbEntered*100):0;
+  document.getElementById('bucket-bestball').innerHTML=`
+    <div class="metric" style="background:transparent;border:none;padding:4px 0;">
+      <div class="metric-label">P&L</div>
+      <div class="metric-val ${bbPL>=0?'pos':'neg'}">${fmt(bbPL)}</div>
+    </div>
+    <div class="metric" style="background:transparent;border:none;padding:4px 0;">
+      <div class="metric-label">Drafts</div>
+      <div class="metric-val">${bbEntries.length}</div>
+    </div>
+    <div class="metric" style="background:transparent;border:none;padding:4px 0;">
+      <div class="metric-label">ROI</div>
+      <div class="metric-val ${bbROI>=0?'pos':'neg'}">${bbROI>=0?'+':''}${bbROI.toFixed(1)}%</div>
+    </div>`;
+
+  // Overall metrics (betting only)
   document.getElementById('dash-metrics').innerHTML=`
     <div class="metric${totalPL>=0?' highlight':''}">
-      <div class="metric-label">Total P&L</div>
+      <div class="metric-label">Betting P&L</div>
       <div class="metric-val ${totalPL>=0?'pos':'neg'}">${fmt(totalPL)}</div>
     </div>
     <div class="metric"><div class="metric-label">Bets</div><div class="metric-val">${bets.length}</div></div>
@@ -1517,6 +1684,7 @@ async function renderDash(){
     <div class="metric"><div class="metric-label">ROI</div><div class="metric-val ${roi>=0?'pos':'neg'}">${roi>=0?'+':''}${roi.toFixed(1)}%</div></div>
     <div class="metric"><div class="metric-label">Staked</div><div class="metric-val">${fmtA(staked)}</div></div>
     <div class="metric"><div class="metric-label">Pending</div><div class="metric-val">${bets.filter(b=>b.result==='pending').length}</div></div>`;
+
   const sportMap={},typeMap={},bookMap={};
   settled.forEach(b=>{
     const pl=calcPL(b);
@@ -2190,6 +2358,116 @@ function renderHubSoccerPlayer(){
   document.getElementById('hub-content').innerHTML=html;
 }
 
+// ── DFS ──
+function setDfsP(p,el){state.dfsP=p;document.querySelectorAll('#dfs-chips .chip').forEach(c=>c.classList.remove('active'));el.classList.add('active');renderDFS();}
+function setBbP(p,el){state.bbP=p;document.querySelectorAll('#bb-chips .chip').forEach(c=>c.classList.remove('active'));el.classList.add('active');renderBestBall();}
+
+function renderDFS(){
+  if(!dataLoaded){loadData().then(renderDFS);return;}
+  let entries=filterP(state.dfs,state.dfsP);
+  const totalPL=entries.reduce((s,d)=>s+d.pl,0);
+  const entered=entries.reduce((s,d)=>s+d.entry,0);
+  const cashed=entries.filter(d=>d.pl>0).length;
+  const roi=entered>0?(totalPL/entered*100):0;
+  document.getElementById('dfs-metrics').innerHTML=`
+    <div class="metric${totalPL>=0?' highlight':''}"><div class="metric-label">P&L</div><div class="metric-val ${totalPL>=0?'pos':'neg'}">${fmt(totalPL)}</div></div>
+    <div class="metric"><div class="metric-label">Contests</div><div class="metric-val">${entries.length}</div></div>
+    <div class="metric"><div class="metric-label">Cashed</div><div class="metric-val ${cashed>0?'pos':''}">${cashed}</div></div>
+    <div class="metric"><div class="metric-label">ROI</div><div class="metric-val ${roi>=0?'pos':'neg'}">${roi>=0?'+':''}${roi.toFixed(1)}%</div></div>
+    <div class="metric"><div class="metric-label">Entered</div><div class="metric-val">${fmtA(entered)}</div></div>`;
+  entries=sortData(entries,sortState.dfs.col,sortState.dfs.dir);
+  updateSortHeaders('dfs');
+  document.getElementById('dfs-table').innerHTML=entries.length?entries.map(d=>`<tr>
+    <td class="tbl-num">${fmtDate(d.date)}</td>
+    <td style="font-weight:600;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${d.name}</td>
+    <td>${d.sport||'—'}</td>
+    <td class="tbl-num">${fmtA(d.entry)}</td>
+    <td class="tbl-num ${d.pl>=0?'pos':'neg'}" style="font-weight:700">${fmt(d.pl)}</td>
+    <td><span class="badge ${d.pl>0?'badge-w':d.status==='active'?'badge-pend':'badge-l'}">${d.pl>0?'cashed':d.status||'pending'}</span></td>
+    <td><button class="btn" style="padding:2px 7px;font-size:10px;" onclick="deleteDFS('${d.id}')">✕</button></td>
+  </tr>`).join(''):`<tr><td colspan="7" class="empty">No DFS contests logged yet</td></tr>`;
+  const sm={},tm={};
+  entries.forEach(d=>{if(d.sport)sm[d.sport]=(sm[d.sport]||0)+d.pl;if(d.contestType)tm[d.contestType]=(tm[d.contestType]||0)+d.pl;});
+  document.getElementById('dfs-sport-bars').innerHTML=barRows(sm,k=>SPORT_COLORS[k]||'var(--blue)');
+  document.getElementById('dfs-type-bars').innerHTML=Object.keys(tm).length?barRows(tm,()=>'var(--orange)'):`<div class="empty">Log contest types to see breakdown</div>`;
+}
+
+async function addDFS(){
+  const sports=['NFL','NBA','MLB','NHL','Golf','Other'];
+  const types=['Classic','Showdown','Tiers','Other'];
+  const name=prompt('Contest name? (e.g. "$20K NFL Sunday Showdown")');if(!name)return;
+  const sportNum=parseInt(prompt('Sport:\n'+sports.map((s,i)=>`${i+1}. ${s}`).join('\n')));
+  const sport=sports[Math.max(0,(sportNum||1)-1)]||'Other';
+  const typeNum=parseInt(prompt('Contest type:\n1. Classic\n2. Showdown\n3. Tiers\n4. Other'));
+  const contestType=types[Math.max(0,(typeNum||1)-1)]||'Classic';
+  const entry=parseFloat(prompt('Entry fee ($)?'))||0;
+  const winnings=parseFloat(prompt('Winnings ($)? (0 if still active or lost)'))||0;
+  const isActive=winnings===0&&prompt('Still active? (y/n)')?.toLowerCase()==='y';
+  const status=winnings>0?'cashed':isActive?'active':'lost';
+  const d={date:new Date().toISOString().slice(0,10),name,sport,contestType,entry,winnings,pl:winnings-entry,status};
+  try{
+    const r=await sheetsApi({action:'addDFS',dfs:d});
+    if(r.ok){d.id=r.id||Date.now();state.dfs.push(d);renderDFS();updateTopbarBankroll();toast('DFS contest saved ✓');}
+    else toast('Error saving');
+  }catch(e){toast('Connection error');}
+}
+
+async function deleteDFS(id){
+  if(!confirm('Delete this DFS entry?'))return;
+  try{await sheetsApi({action:'deleteDFS',id});state.dfs=state.dfs.filter(d=>d.id!=id);renderDFS();toast('Deleted');}
+  catch(e){toast('Error');}
+}
+
+function renderBestBall(){
+  if(!dataLoaded){loadData().then(renderBestBall);return;}
+  let entries=filterP(state.bestball,state.bbP);
+  const totalPL=entries.reduce((s,b)=>s+b.pl,0);
+  const entered=entries.reduce((s,b)=>s+b.entry,0);
+  const cashed=entries.filter(b=>b.pl>0).length;
+  const roi=entered>0?(totalPL/entered*100):0;
+  document.getElementById('bb-metrics').innerHTML=`
+    <div class="metric${totalPL>=0?' highlight':''}"><div class="metric-label">P&L</div><div class="metric-val ${totalPL>=0?'pos':'neg'}">${fmt(totalPL)}</div></div>
+    <div class="metric"><div class="metric-label">Drafts</div><div class="metric-val">${entries.length}</div></div>
+    <div class="metric"><div class="metric-label">Cashed</div><div class="metric-val ${cashed>0?'pos':''}">${cashed}</div></div>
+    <div class="metric"><div class="metric-label">ROI</div><div class="metric-val ${roi>=0?'pos':'neg'}">${roi>=0?'+':''}${roi.toFixed(1)}%</div></div>
+    <div class="metric"><div class="metric-label">Entered</div><div class="metric-val">${fmtA(entered)}</div></div>`;
+  entries=sortData(entries,sortState.bestball.col,sortState.bestball.dir);
+  updateSortHeaders('bestball');
+  document.getElementById('bb-table').innerHTML=entries.length?entries.map(b=>`<tr>
+    <td class="tbl-num">${fmtDate(b.date)}</td>
+    <td style="font-weight:600;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.name}</td>
+    <td>${b.sport||'—'}</td>
+    <td>${b.season||'—'}</td>
+    <td class="tbl-num">${fmtA(b.entry)}</td>
+    <td class="tbl-num ${b.pl>=0?'pos':'neg'}" style="font-weight:700">${fmt(b.pl)}</td>
+    <td><span class="badge ${b.pl>0?'badge-w':b.status==='active'?'badge-pend':'badge-l'}">${b.pl>0?'cashed':b.status||'active'}</span></td>
+    <td><button class="btn" style="padding:2px 7px;font-size:10px;" onclick="deleteBestBall('${b.id}')">✕</button></td>
+  </tr>`).join(''):`<tr><td colspan="8" class="empty">No best ball drafts logged yet</td></tr>`;
+}
+
+async function addBestBall(){
+  const sports=['NFL','NBA','MLB','Other'];
+  const name=prompt('Draft name? (e.g. "Best Ball Mania V — $25")');if(!name)return;
+  const sportNum=parseInt(prompt('Sport:\n1. NFL\n2. NBA\n3. MLB\n4. Other'));
+  const sport=sports[Math.max(0,(sportNum||1)-1)]||'NFL';
+  const season=prompt('Season? (e.g. 2025-26)')||new Date().getFullYear().toString();
+  const entry=parseFloat(prompt('Entry fee ($)?'))||0;
+  const winnings=parseFloat(prompt('Winnings ($)? (0 if still active or lost)'))||0;
+  const isActive=winnings===0&&prompt('Still active? (y/n)')?.toLowerCase()==='y';
+  const status=winnings>0?'cashed':isActive?'active':'lost';
+  const d={date:new Date().toISOString().slice(0,10),name,sport,season,entry,winnings,pl:winnings-entry,status};
+  try{
+    const r=await sheetsApi({action:'addBestBall',bestball:d});
+    if(r.ok){d.id=r.id||Date.now();state.bestball.push(d);renderBestBall();updateTopbarBankroll();toast('Best Ball draft saved ✓');}
+    else toast('Error saving');
+  }catch(e){toast('Connection error');}
+}
+
+async function deleteBestBall(id){
+  if(!confirm('Delete this Best Ball entry?'))return;
+  try{await sheetsApi({action:'deleteBestBall',id});state.bestball=state.bestball.filter(b=>b.id!=id);renderBestBall();toast('Deleted');}
+  catch(e){toast('Error');}
+}
 </script>
 </body>
 </html>
